@@ -1,96 +1,67 @@
 
 
-## Renteaze.com — Full Website Build Plan
+## Layer 1 -- Public Website Excellence Plan
 
-### Design System & Brand Foundation
-- **Color palette**: Deep blue (#1E5E9B) primary, warm gold (#D4A843) accent, clean whites/greys — matching the logo's black + gold identity
-- **Typography**: Plus Jakarta Sans (geometric, modern, mobile-readable)
-- **Design language**: Premium PropTech feel with generous whitespace, subtle scroll animations, outline-style icons via Lucide
-- **Mobile-first**: All components designed from 360px up
+The v2 PRD keeps all v1 public website requirements and adds three key areas for Layer 1. Here is what we will build and upgrade.
 
-### Pages to Build (10 total)
+---
 
-**1. Homepage** — The growth engine
-- Hero with bold PropTech headline + persona-selector CTA strip (Tenant / Landlord / Investor)
-- "What Makes Renteaze Different" — 4 differentiators (Fintech, AI, Digital Platform, Full-Service)
-- Solutions overview grid with icons linking to persona pages
-- "How It Works" — 3-step process per persona (tabbed)
-- Social proof section: stats (15+ years via partner firm, units managed, clients served), testimonials
-- Diaspora investor CTA block
-- Featured properties carousel
-- Blog highlights
-- Full footer with nav, contact, social links, RC number
+### What is changing
 
-**2. For Tenants Page**
-- Hero addressing rent pressure pain point
-- All 7 tenant products detailed: Save for Rent, Loan for Rent, Add-On Funds, Upgrade, Save to Own, Rent-to-Own, Monthly Rent
-- **Interactive Rent Calculator**: Input annual rent → see monthly savings breakdown for Save for Rent plan → lead capture CTA
-- Testimonials from tenant persona
-- Lead capture form + WhatsApp CTA
+**1. Navbar -- Auth Entry Points**
+- Add "Sign In" link and change "Get Started" from WhatsApp link to a registration trigger
+- Both route to a new `/auth` page with role-selection (Tenant / Landlord / Investor) registration flow and sign-in tab
+- Mobile nav gets the same treatment
 
-**3. For Landlords Page**
-- Hero addressing income protection & management pain points
-- All 7 landlord products: Guaranteed Rent, Save for My House, Property Management, Facility Management, Construction/Renovation/Repair Financing
-- Social proof (units managed, satisfaction metrics)
-- Lead capture form + WhatsApp CTA
+**2. Homepage -- Three New Sections**
+- **Portal access strip** below hero: "Go to My Account" (if logged in concept) / "Sign Up / Sign In" CTA bar
+- **Upcoming Events module**: 2-3 upcoming seminars/training events with date, title, description, and "Register" CTA (static data for now)
+- **Updated social proof counters**: add "Loans Disbursed" to the existing stats bar to match PRD (tenants served, landlords partnered, properties managed, loans disbursed)
 
-**4. For Investors Page**
-- Hero targeting diaspora investors with trust-first messaging
-- All 4 investment products: Joint Ventures, Property Sales, Facility Management, Sponsorship & Land Reward
-- Trust signals section (RC number, professional affiliations, credentials)
-- Diaspora-specific content section
-- Lead capture form + WhatsApp CTA
+**3. Product Pages -- Apply Now / Get Started CTAs**
+- Every product card on For Tenants, For Landlords, and For Investors pages gets a prominent "Apply Now" or "Get Started" button
+- Button links to `/auth?product=save-for-rent&role=tenant` (product context preserved in URL)
+- Clear visual hierarchy: the CTA is the primary action on each product card
 
-**5. Our Platform (Tech Page)**
-- Visual platform ecosystem diagram showing Fintech + AI + Automation + Data Intelligence
-- Accessible explanations of each tech capability
-- How technology differentiates Renteaze from traditional agencies
-- Integration overview (payment systems, property management tools, data analytics)
+**4. Auth Page (new)**
+- `/auth` route with two tabs: Sign In and Register
+- Register tab: role selector (Tenant/Landlord/Investor) -> role-specific fields
+  - Tenant: name, email, phone, annual rent, location
+  - Landlord: name, email, phone, property address, number of units
+  - Investor: name, email, phone, investment interest, country of residence
+- Sign In tab: email + password (visual only -- shows success toast)
+- Reads `?product=` and `?role=` query params to pre-select role and show product context
+- "Forgot password" link (shows toast for now)
+- All forms show success toast on submit (no backend yet)
 
-**6. About Page**
-- Company story, mission, vision
-- Dapo Okunogbe & Partners partnership history (est. 2009)
-- Team section with bios
-- Values, credentials, RC 1768094
-- Professional affiliations and accreditations
-- Trust & credibility section
+**5. Events/Training Section (new component)**
+- Reusable `UpcomingEvents` component with 2-3 sample events
+- Each event: title, date, location (online/Lagos), short description, "Register Now" button
+- Registration button opens a simple modal with name/email/phone form (toast on submit)
+- Used on Homepage and available for standalone `/events` page later
 
-**7. Properties Page**
-- Searchable, filterable listing grid (rent/buy/short-let)
-- Filters: property type, location, price range, bedrooms
-- Property cards: image, type, location, price, bedrooms, key features
-- 5-10 sample curated listings
-- Property detail view with enquiry form
+**6. Visual & UX Polish Pass**
+- Add subtle scroll-reveal animations (CSS `animate-fade-in` on section entry via Intersection Observer)
+- Improve product card hover states with micro-interactions
+- Ensure every page section is never more than one screen away from a CTA
+- Add "Apply Now" buttons to calculator results section on Tenants page
 
-**8. Blog/Insights Page**
-- Blog listing with category filters
-- 5 initial placeholder articles (tenant rights, landlord guides, Lagos market, PropTech in Nigeria, diaspora investment)
-- Individual article template
-- SEO-optimized structure
+---
 
-**9. Contact Page**
-- Lead capture form (name, phone, email, enquiry type, message)
-- Phone numbers, Lagos office address
-- Prominent WhatsApp Business CTA
-- Google Maps embed placeholder
-- Office hours
+### Files to create or modify
 
-**10. FAQ Page**
-- Accordion layout segmented by persona (Tenants, Landlords, Investors)
-- 5+ FAQs per segment
-- Search/filter functionality
+| File | Action |
+|------|--------|
+| `src/pages/Auth.tsx` | Create -- registration/login page |
+| `src/components/UpcomingEvents.tsx` | Create -- events module |
+| `src/components/EventRegistrationModal.tsx` | Create -- event signup modal |
+| `src/components/Navbar.tsx` | Modify -- add Sign In + Get Started routing |
+| `src/pages/Index.tsx` | Modify -- add portal strip, events, update stats |
+| `src/pages/ForTenants.tsx` | Modify -- add Apply Now CTAs to product cards |
+| `src/pages/ForLandlords.tsx` | Modify -- add Apply Now CTAs to product cards |
+| `src/pages/ForInvestors.tsx` | Modify -- add Apply Now CTAs to product cards |
+| `src/App.tsx` | Modify -- add `/auth` route |
+| `src/index.css` | Modify -- add scroll animation keyframes |
 
-### Shared Components
-- **Navbar**: Logo, primary nav (Home, For Tenants, For Landlords, For Investors, Our Platform, About, Properties, Blog, Contact), mobile hamburger menu, WhatsApp floating button
-- **Footer**: Full navigation, contact info, social links, RC number, regulatory disclosure, newsletter signup placeholder
-- **Lead capture forms**: Name, phone, email, enquiry type, free text — show success toast on submit
-- **WhatsApp CTAs**: Deep-links with pre-filled messages per persona throughout all pages
-- **Floating WhatsApp button**: Persistent on mobile
-
-### Growth Engineering Details
-- Schema markup ready structure (LocalBusiness, RealEstateListing)
-- Open Graph meta tags per page for social sharing
-- SEO-optimized headings, page titles, and content structure targeting the keyword clusters from the PRD
-- Conversion-focused layout: CTAs at every scroll depth, never more than one screen from a contact option
-- Performance-optimized: lazy loading images, minimal animations, optimized bundle
+No backend or database required -- all forms show success toasts. This gives a complete, polished Layer 1 that is ready to connect to Supabase auth when Layer 2 begins.
 
