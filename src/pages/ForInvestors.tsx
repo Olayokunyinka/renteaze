@@ -1,4 +1,5 @@
-import { TrendingUp, Building, Wrench, Gift, ShieldCheck, Globe, Users, CheckCircle2 } from "lucide-react";
+import { Link } from "react-router-dom";
+import { TrendingUp, Building, Wrench, Gift, ShieldCheck, Globe, CheckCircle2, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import Layout from "@/components/Layout";
@@ -6,10 +7,10 @@ import SectionHeading from "@/components/SectionHeading";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 
 const products = [
-  { icon: TrendingUp, title: "Joint Ventures", desc: "Partner with us on premium real estate projects. We bring the market expertise, you bring the capital — shared risk, shared returns." },
-  { icon: Building, title: "Property Sales", desc: "Access curated, vetted properties across Lagos for purchase. Complete due diligence, legal verification, and end-to-end transaction support." },
-  { icon: Wrench, title: "Facility Management", desc: "Invest in property and let us handle the operations. Full facility management for your investment portfolio." },
-  { icon: Gift, title: "Sponsorship & Land Reward", desc: "Sponsor real estate developments and receive land allocations as returns. A unique asset-backed investment model." },
+  { icon: TrendingUp, title: "Joint Ventures", slug: "joint-ventures", desc: "Partner with us on premium real estate projects. We bring the market expertise, you bring the capital — shared risk, shared returns." },
+  { icon: Building, title: "Property Sales", slug: "property-sales", desc: "Access curated, vetted properties across Lagos for purchase. Complete due diligence, legal verification, and end-to-end transaction support." },
+  { icon: Wrench, title: "Facility Management", slug: "facility-management", desc: "Invest in property and let us handle the operations. Full facility management for your investment portfolio." },
+  { icon: Gift, title: "Sponsorship & Land Reward", slug: "sponsorship-land-reward", desc: "Sponsor real estate developments and receive land allocations as returns. A unique asset-backed investment model." },
 ];
 
 const trustSignals = [
@@ -39,6 +40,11 @@ const ForInvestors = () => (
                 Explore Opportunities
               </Button>
             </a>
+            <Link to="/auth?role=investor">
+              <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary/20">
+                Create Account
+              </Button>
+            </Link>
           </div>
         </div>
       </div>
@@ -49,13 +55,18 @@ const ForInvestors = () => (
         <SectionHeading title="Investment Products" subtitle="Multiple ways to grow your wealth through Nigerian real estate." />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {products.map((p) => (
-            <Card key={p.title} className="hover:shadow-lg transition-shadow">
-              <CardContent className="p-6">
+            <Card key={p.title} className="hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
+              <CardContent className="p-6 flex flex-col h-full">
                 <div className="h-12 w-12 rounded-lg bg-light-blue flex items-center justify-center mb-4">
                   <p.icon className="h-6 w-6 text-primary" />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{p.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
+                <Link to={`/auth?role=investor&product=${p.slug}`}>
+                  <Button variant="outline" size="sm" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground gap-1.5">
+                    Apply Now <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}
