@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Home, PiggyBank, Banknote, Plus, ArrowUpCircle, Building, Key, CalendarDays, Calculator, ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -9,13 +10,13 @@ import SectionHeading from "@/components/SectionHeading";
 import LeadCaptureForm from "@/components/LeadCaptureForm";
 
 const products = [
-  { icon: PiggyBank, title: "Save for Rent", desc: "Break your annual rent into manageable monthly savings. Start small, stay consistent, and never scramble for rent again.", highlight: true },
-  { icon: Banknote, title: "Loan for Rent", desc: "Need rent now? Access affordable rent financing with flexible repayment plans tailored to your income cycle." },
-  { icon: Plus, title: "Add-On Funds", desc: "Top up your rent savings when you're short. Bridge the gap between what you've saved and what you need." },
-  { icon: ArrowUpCircle, title: "Rent Upgrade", desc: "Ready for a better space? Upgrade your apartment with our financing support — move first, pay over time." },
-  { icon: Building, title: "Save to Own", desc: "Transform your rent payments into equity. Save consistently toward owning your own home." },
-  { icon: Key, title: "Rent-to-Own", desc: "Live in the property while paying toward ownership. Your rent becomes your mortgage." },
-  { icon: CalendarDays, title: "Monthly Rent", desc: "Pay rent monthly instead of annually. We negotiate with landlords and handle the payments." },
+  { icon: PiggyBank, title: "Save for Rent", slug: "save-for-rent", desc: "Break your annual rent into manageable monthly savings. Start small, stay consistent, and never scramble for rent again.", highlight: true },
+  { icon: Banknote, title: "Loan for Rent", slug: "loan-for-rent", desc: "Need rent now? Access affordable rent financing with flexible repayment plans tailored to your income cycle." },
+  { icon: Plus, title: "Add-On Funds", slug: "add-on-funds", desc: "Top up your rent savings when you're short. Bridge the gap between what you've saved and what you need." },
+  { icon: ArrowUpCircle, title: "Rent Upgrade", slug: "rent-upgrade", desc: "Ready for a better space? Upgrade your apartment with our financing support — move first, pay over time." },
+  { icon: Building, title: "Save to Own", slug: "save-to-own", desc: "Transform your rent payments into equity. Save consistently toward owning your own home." },
+  { icon: Key, title: "Rent-to-Own", slug: "rent-to-own", desc: "Live in the property while paying toward ownership. Your rent becomes your mortgage." },
+  { icon: CalendarDays, title: "Monthly Rent", slug: "monthly-rent", desc: "Pay rent monthly instead of annually. We negotiate with landlords and handle the payments." },
 ];
 
 const testimonials = [
@@ -81,6 +82,11 @@ const RentCalculator = () => {
             <p className="text-sm text-muted-foreground">
               Save ₦{Math.round(monthly).toLocaleString()}/month for {months} months to cover your ₦{annualRent.toLocaleString()} annual rent.
             </p>
+            <Link to="/auth?role=tenant&product=save-for-rent">
+              <Button className="w-full mt-2 bg-accent text-accent-foreground hover:opacity-90 gap-2">
+                Start Saving Now <ArrowRight className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
         </div>
       </CardContent>
@@ -107,11 +113,11 @@ const ForTenants = () => (
                 Calculate Your Savings <Calculator className="h-4 w-4" />
               </Button>
             </a>
-            <a href="#contact">
+            <Link to="/auth?role=tenant">
               <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary/20">
-                Talk to an Advisor
+                Create Account
               </Button>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -123,13 +129,18 @@ const ForTenants = () => (
         <SectionHeading title="7 Ways We Help You Rent" subtitle="From saving to owning — choose the plan that fits your life." />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {products.map((p) => (
-            <Card key={p.title} className={`hover:shadow-lg transition-shadow ${p.highlight ? "border-2 border-accent" : ""}`}>
-              <CardContent className="p-6">
+            <Card key={p.title} className={`hover:shadow-lg hover:-translate-y-1 transition-all duration-300 ${p.highlight ? "border-2 border-accent" : ""}`}>
+              <CardContent className="p-6 flex flex-col h-full">
                 <div className={`h-12 w-12 rounded-lg flex items-center justify-center mb-4 ${p.highlight ? "bg-accent/10" : "bg-light-blue"}`}>
                   <p.icon className={`h-6 w-6 ${p.highlight ? "text-accent" : "text-primary"}`} />
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{p.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{p.desc}</p>
+                <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
+                <Link to={`/auth?role=tenant&product=${p.slug}`}>
+                  <Button variant="outline" size="sm" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground gap-1.5">
+                    Apply Now <ArrowRight className="h-3.5 w-3.5" />
+                  </Button>
+                </Link>
               </CardContent>
             </Card>
           ))}

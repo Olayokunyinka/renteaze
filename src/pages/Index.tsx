@@ -1,10 +1,11 @@
 import { Link } from "react-router-dom";
-import { Building2, Wallet, Shield, Brain, Home, Users, TrendingUp, ArrowRight, CheckCircle2, Star, ChevronRight } from "lucide-react";
+import { Building2, Wallet, Shield, Brain, Home, Users, TrendingUp, ArrowRight, CheckCircle2, Star, ChevronRight, LogIn, UserPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
+import UpcomingEvents from "@/components/UpcomingEvents";
 
 const personas = [
   { label: "I'm a Tenant", path: "/for-tenants", icon: Home, desc: "Flexible rent solutions & savings plans" },
@@ -20,10 +21,10 @@ const differentiators = [
 ];
 
 const stats = [
-  { value: "15+", label: "Years Experience" },
+  { value: "2,000+", label: "Tenants Served" },
   { value: "500+", label: "Properties Managed" },
-  { value: "2,000+", label: "Happy Clients" },
-  { value: "₦5B+", label: "Transactions Processed" },
+  { value: "300+", label: "Landlords Partnered" },
+  { value: "₦2B+", label: "Loans Disbursed" },
 ];
 
 const tenantSteps = [
@@ -72,7 +73,7 @@ const Index = () => (
         <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
           {personas.map((p) => (
             <Link key={p.path} to={p.path}>
-              <Card className="bg-primary/10 border-primary/20 hover:bg-primary/20 transition-colors cursor-pointer h-full">
+              <Card className="bg-primary/10 border-primary/20 hover:bg-primary/20 hover:scale-[1.02] transition-all cursor-pointer h-full">
                 <CardContent className="p-5 text-center">
                   <p.icon className="h-8 w-8 mx-auto mb-2 text-accent" />
                   <p className="font-semibold text-navy-foreground">{p.label}</p>
@@ -81,6 +82,27 @@ const Index = () => (
               </Card>
             </Link>
           ))}
+        </div>
+      </div>
+    </section>
+
+    {/* Portal Access Strip */}
+    <section className="bg-light-blue border-b border-border py-4">
+      <div className="container mx-auto px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <p className="text-sm font-medium text-foreground">
+          Access your Renteaze portal to manage rent, properties, or investments.
+        </p>
+        <div className="flex gap-3">
+          <Link to="/auth?tab=signin">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <LogIn className="h-4 w-4" /> Sign In
+            </Button>
+          </Link>
+          <Link to="/auth">
+            <Button size="sm" className="bg-accent text-accent-foreground hover:opacity-90 gap-1.5">
+              <UserPlus className="h-4 w-4" /> Create Account
+            </Button>
+          </Link>
         </div>
       </div>
     </section>
@@ -103,7 +125,7 @@ const Index = () => (
         <SectionHeading title="What Makes Renteaze Different" subtitle="We're not just a listing site. We're a full-stack PropTech platform." />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {differentiators.map((d) => (
-            <Card key={d.title} className="border-none shadow-md hover:shadow-lg transition-shadow">
+            <Card key={d.title} className="border-none shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
               <CardContent className="p-6">
                 <div className="h-12 w-12 rounded-lg bg-light-blue flex items-center justify-center mb-4">
                   <d.icon className="h-6 w-6 text-primary" />
@@ -146,6 +168,13 @@ const Index = () => (
                   </div>
                 ))}
               </div>
+              <div className="mt-8 text-center">
+                <Link to={`/auth?role=${tab.value}`}>
+                  <Button className="bg-accent text-accent-foreground hover:opacity-90 gap-2">
+                    Get Started as {tab.value === "tenant" ? "a Tenant" : tab.value === "landlord" ? "a Landlord" : "an Investor"} <ArrowRight className="h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
             </TabsContent>
           ))}
         </Tabs>
@@ -158,7 +187,7 @@ const Index = () => (
         <SectionHeading title="What Our Clients Say" subtitle="Real stories from tenants, landlords, and investors across Nigeria." />
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {testimonials.map((t) => (
-            <Card key={t.name} className="border-none shadow-md">
+            <Card key={t.name} className="border-none shadow-md hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
                 <div className="flex gap-1 mb-3">
                   {Array.from({ length: t.rating }).map((_, i) => (
@@ -174,6 +203,9 @@ const Index = () => (
         </div>
       </div>
     </section>
+
+    {/* Upcoming Events */}
+    <UpcomingEvents />
 
     {/* Diaspora CTA */}
     <section className="py-16 md:py-20 bg-navy text-navy-foreground">
@@ -204,7 +236,7 @@ const Index = () => (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {personas.map((p) => (
             <Link key={p.path} to={p.path}>
-              <Card className="group hover:shadow-lg transition-shadow h-full border-2 hover:border-primary">
+              <Card className="group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full border-2 hover:border-primary">
                 <CardContent className="p-8 text-center">
                   <p.icon className="h-12 w-12 mx-auto mb-4 text-primary group-hover:text-accent transition-colors" />
                   <h3 className="text-xl font-semibold mb-2">{p.label.replace("I'm a ", "")}</h3>
@@ -227,10 +259,15 @@ const Index = () => (
         <p className="mt-4 text-lg opacity-90 max-w-xl mx-auto">
           Join thousands of Nigerians already renting smarter, owning faster, and investing better with Renteaze.
         </p>
-        <div className="mt-8">
-          <Link to="/contact">
+        <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
+          <Link to="/auth">
             <Button size="lg" className="bg-accent text-accent-foreground hover:opacity-90">
-              Contact Us Today
+              Create Your Account
+            </Button>
+          </Link>
+          <Link to="/contact">
+            <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10">
+              Contact Us
             </Button>
           </Link>
         </div>

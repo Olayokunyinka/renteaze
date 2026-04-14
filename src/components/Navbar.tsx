@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Menu, X, ChevronDown } from "lucide-react";
+import { Menu, X, ChevronDown, LogIn } from "lucide-react";
 import logo from "@/assets/renteaze-logo-white.png";
 
 const navLinks = [
@@ -77,14 +77,19 @@ const Navbar = () => {
               </Link>
             )
           )}
-          <a
-            href="https://wa.me/2348000000000?text=Hello%20Renteaze%2C%20I%27d%20like%20to%20learn%20more"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="ml-3 px-4 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-md hover:opacity-90 transition-opacity"
+          <Link
+            to="/auth?tab=signin"
+            className="ml-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-primary/20 transition-colors inline-flex items-center gap-1.5"
+          >
+            <LogIn className="h-4 w-4" />
+            Sign In
+          </Link>
+          <Link
+            to="/auth"
+            className="ml-1 px-4 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-md hover:opacity-90 transition-opacity"
           >
             Get Started
-          </a>
+          </Link>
         </div>
 
         {/* Mobile toggle */}
@@ -128,15 +133,21 @@ const Navbar = () => {
               </Link>
             )
           )}
-          <div className="px-4 pt-2">
-            <a
-              href="https://wa.me/2348000000000?text=Hello%20Renteaze"
-              target="_blank"
-              rel="noopener noreferrer"
+          <div className="px-4 pt-2 space-y-2">
+            <Link
+              to="/auth?tab=signin"
+              onClick={() => setMobileOpen(false)}
+              className="block text-center px-4 py-2 border border-primary/30 text-sm font-semibold rounded-md hover:bg-primary/20 transition-colors"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/auth"
+              onClick={() => setMobileOpen(false)}
               className="block text-center px-4 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-md"
             >
               Get Started
-            </a>
+            </Link>
           </div>
         </div>
       )}
