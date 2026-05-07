@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { Building2, Wallet, Shield, Brain, Home, Users, TrendingUp, ArrowRight, CheckCircle2, Star, ChevronRight, LogIn, UserPlus } from "lucide-react";
+import { Building2, Wallet, Shield, Home, Users, TrendingUp, ArrowRight, Star, ChevronRight, HandshakeIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,17 +14,10 @@ const personas = [
 ];
 
 const differentiators = [
-  { icon: Wallet, title: "Fintech-Powered", desc: "Save for rent, access rent loans, and manage payments through our integrated financial platform." },
-  { icon: Brain, title: "AI-Driven Insights", desc: "Smart property matching, market analytics, and predictive pricing for better decisions." },
-  { icon: Shield, title: "Full-Service Platform", desc: "End-to-end property management, facility maintenance, and tenant support in one place." },
-  { icon: Building2, title: "15+ Years Expertise", desc: "Backed by Dapo Okunogbe & Partners with deep Nigerian real estate market knowledge." },
-];
-
-const stats = [
-  { value: "2,000+", label: "Tenants Served" },
-  { value: "500+", label: "Properties Managed" },
-  { value: "300+", label: "Landlords Partnered" },
-  { value: "₦2B+", label: "Loans Disbursed" },
+  { icon: Shield, title: "Trust & Transparency", desc: "Clear pricing, verified properties, and honest contracts. No hidden agent fees, no surprises at move-in." },
+  { icon: Wallet, title: "Flexible Rent Solutions", desc: "Pay rent monthly, save toward annual rent, or access rent loans. We meet you where your cashflow is." },
+  { icon: Home, title: "End-to-End Property Care", desc: "From tenant screening to facility maintenance, we manage the full lifecycle so landlords earn without the headaches." },
+  { icon: Building2, title: "Backed by 15+ Years of Real Estate", desc: "Rooted in Dapo Okunogbe & Partners' deep Lagos market experience — not a startup guessing its way through." },
 ];
 
 const tenantSteps = [
