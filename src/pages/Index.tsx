@@ -79,40 +79,6 @@ const Index = () => (
       </div>
     </section>
 
-    {/* Portal Access Strip */}
-    <section className="bg-light-blue border-b border-border py-4">
-      <div className="container mx-auto px-4 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <p className="text-sm font-medium text-foreground">
-          Access your Renteaze portal to manage rent, properties, or investments.
-        </p>
-        <div className="flex gap-3">
-          <Link to="/auth?tab=signin">
-            <Button variant="outline" size="sm" className="gap-1.5">
-              <LogIn className="h-4 w-4" /> Sign In
-            </Button>
-          </Link>
-          <Link to="/auth">
-            <Button size="sm" className="bg-accent text-accent-foreground hover:opacity-90 gap-1.5">
-              <UserPlus className="h-4 w-4" /> Create Account
-            </Button>
-          </Link>
-        </div>
-      </div>
-    </section>
-
-    {/* Stats bar */}
-    <section className="bg-primary text-primary-foreground py-8">
-      <div className="container mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-        {stats.map((s) => (
-          <div key={s.label}>
-            <p className="text-3xl md:text-4xl font-bold">{s.value}</p>
-            <p className="text-sm mt-1 opacity-80">{s.label}</p>
-          </div>
-        ))}
-      </div>
-    </section>
-
-    {/* Differentiators */}
     <section className="py-16 md:py-20">
       <div className="container mx-auto px-4 lg:px-8">
         <SectionHeading title="What Makes Renteaze Different" subtitle="We're not just a listing site. We're a full-stack PropTech platform." />
