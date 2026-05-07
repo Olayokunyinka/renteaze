@@ -8,7 +8,9 @@ const Footer = () => (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         {/* Brand */}
         <div>
-          <img src={logo} alt="Renteaze" className="h-10 mb-4" />
+          <span className="inline-flex items-center bg-background rounded-md px-3 py-1.5 ring-1 ring-foreground/5 shadow-sm mb-4">
+            <img src={logo} alt="Renteaze" className="h-10" />
+          </span>
           <p className="text-sm text-muted-foreground leading-relaxed">
             Nigeria's PropTech platform making renting, owning, and investing in property smarter and more accessible.
           </p>
