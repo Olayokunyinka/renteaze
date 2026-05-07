@@ -13,7 +13,6 @@ const navLinks = [
       { label: "For Investors", path: "/for-investors" },
     ],
   },
-  { label: "Our Platform", path: "/platform" },
   { label: "Properties", path: "/properties" },
   { label: "About", path: "/about" },
   { label: "Blog", path: "/blog" },

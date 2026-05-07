@@ -25,7 +25,6 @@ const Footer = () => (
               { label: "For Tenants", path: "/for-tenants" },
               { label: "For Landlords", path: "/for-landlords" },
               { label: "For Investors", path: "/for-investors" },
-              { label: "Our Platform", path: "/platform" },
               { label: "Properties", path: "/properties" },
             ].map((l) => (
               <li key={l.path}>
