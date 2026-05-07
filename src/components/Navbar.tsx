@@ -32,7 +32,9 @@ const Navbar = () => {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-navy text-navy-foreground">
       <div className="container mx-auto flex items-center justify-between h-16 px-4 lg:px-8">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="Renteaze" className="h-10" />
+          <span className="inline-flex items-center bg-background rounded-md px-3 py-1.5 ring-1 ring-foreground/5 shadow-sm">
+            <img src={logo} alt="Renteaze" className="h-9" />
+          </span>
         </Link>
 
         {/* Desktop nav */}
