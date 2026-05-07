@@ -81,7 +81,7 @@ const Index = () => (
 
     <section className="py-16 md:py-20">
       <div className="container mx-auto px-4 lg:px-8">
-        <SectionHeading title="What Makes Renteaze Different" subtitle="We're not just a listing site. We're a full-stack PropTech platform." />
+        <SectionHeading title="Why Renteaze" subtitle="Built on the things that actually matter to Nigerian renters, landlords, and investors." />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {differentiators.map((d) => (
             <Card key={d.title} className="border-none shadow-md hover:shadow-lg hover:-translate-y-1 transition-all duration-300">
