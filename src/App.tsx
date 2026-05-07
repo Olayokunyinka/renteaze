@@ -7,7 +7,7 @@ import Index from "./pages/Index";
 import ForTenants from "./pages/ForTenants";
 import ForLandlords from "./pages/ForLandlords";
 import ForInvestors from "./pages/ForInvestors";
-import Platform from "./pages/Platform";
+
 import About from "./pages/About";
 import Properties from "./pages/Properties";
 import Blog from "./pages/Blog";
@@ -29,7 +29,7 @@ const App = () => (
           <Route path="/for-tenants" element={<ForTenants />} />
           <Route path="/for-landlords" element={<ForLandlords />} />
           <Route path="/for-investors" element={<ForInvestors />} />
-          <Route path="/platform" element={<Platform />} />
+          
           <Route path="/about" element={<About />} />
           <Route path="/properties" element={<Properties />} />
           <Route path="/blog" element={<Blog />} />
