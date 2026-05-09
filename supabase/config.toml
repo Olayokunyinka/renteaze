@@ -1,4 +1,1 @@
 project_id = "neamtpgdqbfuxotozkpd"
-
-[functions.verify-nin]
-verify_jwt = true
