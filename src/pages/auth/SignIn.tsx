@@ -12,7 +12,7 @@ const SignIn = () => {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const redirect = params.get("redirect");
-  const { user, roles, profile, loading } = useAuth();
+  const { user, roles, loading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -20,10 +20,8 @@ const SignIn = () => {
   useEffect(() => {
     if (loading || !user) return;
     if (redirect) { navigate(redirect, { replace: true }); return; }
-    if (profile && !profile.phone_verified) { navigate("/signup/verify-phone", { replace: true }); return; }
-    if (profile && !profile.survey_completed) { navigate("/signup/survey", { replace: true }); return; }
     navigate(dashboardPathForRole(roles[0]), { replace: true });
-  }, [user, loading, profile, roles, redirect, navigate]);
+  }, [user, loading, roles, redirect, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
