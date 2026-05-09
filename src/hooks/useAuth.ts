@@ -46,6 +46,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Lovable Cloud not enabled yet — skip Supabase wiring to avoid crashes during mock phase
+    if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY) {
+      setLoading(false);
+      return;
+    }
+
     // Subscribe FIRST to avoid race conditions
     const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
       setSession(s);
