@@ -83,17 +83,12 @@ const SignUpDetails = () => {
         }).eq("id", userId);
       }
 
-      // Send 6-digit OTP via email (Supabase built-in, no SMS cost)
-      const { error: otpErr } = await supabase.auth.signInWithOtp({
-        email: form.email,
-        options: { shouldCreateUser: true },
-      });
-      if (otpErr) throw otpErr;
-
+      // Mock phase: skip phone/email OTP and go straight to the in-platform survey.
+      // (VerifyPhone screen + verify-otp edge fn stay in place for when SMS goes live.)
       sessionStorage.setItem("rz_email", form.email);
       if (userId) sessionStorage.setItem("rz_user", userId);
-      toast.success("Account created — check your email for a 6-digit code");
-      navigate("/signup/verify-phone");
+      toast.success("Account created — let's personalise your experience");
+      navigate("/signup/survey");
     } catch (err) {
       toast.error((err as Error).message || "Sign up failed");
     } finally {
