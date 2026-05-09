@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import AuthShell from "@/components/auth/AuthShell";
@@ -6,7 +6,6 @@ import AddressAutocomplete from "@/components/auth/AddressAutocomplete";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, dashboardPathForRole } from "@/hooks/useAuth";
@@ -16,15 +15,54 @@ const NON_WORKING = ["student", "retired", "unemployed"];
 const RESIDENTIAL_TYPES = ["tenement", "flat", "bungalow", "duplex"];
 
 type Coords = { lat: number; lon: number };
+type Opt = { v: string; l: string };
 
 const Survey = () => {
-  const { user, roles, refreshProfile, loading } = useAuth();
+  const { user, profile, roles, refreshProfile, loading } = useAuth();
   const navigate = useNavigate();
   const [group, setGroup] = useState(1);
   const [submitting, setSubmitting] = useState(false);
   const [a, setA] = useState<Record<string, string>>({ country: "NG" });
   const [residenceCoords, setResidenceCoords] = useState<Coords | null>(null);
   const [officeCoords, setOfficeCoords] = useState<Coords | null>(null);
+
+  const editMode = !!profile?.survey_completed;
+
+  // Prefill from existing profile data
+  useEffect(() => {
+    if (!profile) return;
+    const p = profile as Record<string, unknown>;
+    const get = (k: string) => (p[k] == null ? "" : String(p[k]));
+    setA({
+      country: get("country") || "NG",
+      q1: get("gender"),
+      q2: get("marital_status"),
+      q3: get("age_range"),
+      q4: get("state_of_residence"),
+      q5: get("address_of_residence"),
+      q6: get("occupation"),
+      q7: get("office_address"),
+      q8: get("accommodation_type"),
+      bedrooms: get("bedrooms"),
+      bathrooms: get("bathrooms"),
+      toilets: get("toilets"),
+      q9: p.is_current_tenant === true ? "yes" : p.is_current_tenant === false ? "no" : "",
+      q10: get("tenancy_property_type"),
+      q11: get("annual_rent_range"),
+      q12: get("tenancy_period"),
+      q13: get("tenancy_duration"),
+      q14: get("pays_rent_to"),
+      q15: get("rent_payment_ease"),
+      q16: get("pays_on_time"),
+      q17: get("rent_payment_method"),
+      q18: p.sought_rent_help_before === true ? "yes" : p.sought_rent_help_before === false ? "no" : "",
+      q19: get("interested_in_platform"),
+      q20: get("acquisition_source"),
+      q21: p.marketing_consent === true ? "yes" : p.marketing_consent === false ? "no" : "",
+    });
+    if (p.address_lat && p.address_lon) setResidenceCoords({ lat: Number(p.address_lat), lon: Number(p.address_lon) });
+    if (p.office_lat && p.office_lon) setOfficeCoords({ lat: Number(p.office_lat), lon: Number(p.office_lon) });
+  }, [profile]);
 
   const set = (k: string, v: string) => setA((prev) => ({ ...prev, [k]: v }));
   const isTenant = a.q9 === "yes";
@@ -35,7 +73,7 @@ const Survey = () => {
   if (loading) return <AuthShell><p>Loading…</p></AuthShell>;
   if (!user) { navigate("/signin"); return null; }
 
-  const skip = () => navigate(dashboardPathForRole(roles[0]));
+  const exit = () => navigate(dashboardPathForRole(roles[0]));
 
   const validateGroup = (g: number): boolean => {
     if (g === 1) return !!(a.country && a.q1 && a.q2 && a.q3 && a.q4 && a.q5);
@@ -119,7 +157,9 @@ const Survey = () => {
       }).eq("id", user.id);
       if (error) throw error;
       await refreshProfile();
-      toast.success("Profile complete!", { description: "We have personalised your experience." });
+      toast.success(editMode ? "Responses updated!" : "Profile complete!", {
+        description: editMode ? "Your changes have been saved." : "We have personalised your experience.",
+      });
       navigate(dashboardPathForRole(roles[0]));
     } catch (err) {
       toast.error((err as Error).message);
@@ -128,14 +168,14 @@ const Survey = () => {
     }
   };
 
-  const RG = (name: string, opts: { v: string; l: string }[], cols = 1) => (
-    <RadioGroup value={a[name] || ""} onValueChange={(v) => set(name, v)} className={`grid gap-2 grid-cols-${cols}`}>
-      {opts.map((o) => (
-        <label key={o.v} className="flex items-center gap-2 border rounded-md p-2.5 cursor-pointer hover:bg-muted text-sm">
-          <RadioGroupItem value={o.v} /> {o.l}
-        </label>
-      ))}
-    </RadioGroup>
+  // Dropdown helper (replaces radio groups)
+  const SEL = (name: string, opts: Opt[], placeholder = "Select an option") => (
+    <Select value={a[name] || ""} onValueChange={(v) => set(name, v)}>
+      <SelectTrigger className="mt-1"><SelectValue placeholder={placeholder} /></SelectTrigger>
+      <SelectContent>
+        {opts.map((o) => <SelectItem key={o.v} value={o.v}>{o.l}</SelectItem>)}
+      </SelectContent>
+    </Select>
   );
 
   const numberSelect = (name: string, max: number, label: string) => (
@@ -156,26 +196,35 @@ const Survey = () => {
 
   return (
     <AuthShell step={{ current: group, total: 5 }}>
-      <div className="flex items-start justify-between">
-        <h1 className="text-2xl font-bold">
-          {group === 1 && "Personal Background"}
-          {group === 2 && "Occupation & Living"}
-          {group === 3 && "Tenancy Details"}
-          {group === 4 && "Rent Payment Behaviour"}
-          {group === 5 && "Interest & Consent"}
-        </h1>
-        <button onClick={skip} className="text-xs text-muted-foreground hover:text-foreground">Skip for now</button>
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-bold">
+            {group === 1 && "Personal Background"}
+            {group === 2 && "Occupation & Living"}
+            {group === 3 && "Tenancy Details"}
+            {group === 4 && "Rent Payment Behaviour"}
+            {group === 5 && "Interest & Consent"}
+          </h1>
+          {editMode && (
+            <p className="text-xs text-muted-foreground mt-1">
+              You're editing your previously submitted responses.
+            </p>
+          )}
+        </div>
+        <button onClick={exit} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
+          {editMode ? "Back to dashboard" : "Skip for now"}
+        </button>
       </div>
 
       <div className="mt-5 bg-card border rounded-xl p-6 space-y-5">
         {group === 1 && (
           <>
-            <div><Label>Gender</Label>{RG("q1", [{v:"female",l:"Female"},{v:"male",l:"Male"}], 2)}</div>
-            <div><Label>Marital Status</Label>{RG("q2", [{v:"married",l:"Married"},{v:"single",l:"Single"},{v:"other",l:"Other"}], 3)}</div>
-            <div><Label>Age</Label>{RG("q3", [
+            <div><Label>Gender</Label>{SEL("q1", [{v:"female",l:"Female"},{v:"male",l:"Male"}], "Select gender")}</div>
+            <div><Label>Marital Status</Label>{SEL("q2", [{v:"married",l:"Married"},{v:"single",l:"Single"},{v:"other",l:"Other"}], "Select marital status")}</div>
+            <div><Label>Age</Label>{SEL("q3", [
               {v:"18-30",l:"18–30"},{v:"31-45",l:"31–45"},{v:"46-55",l:"46–55"},
               {v:"56-65",l:"56–65"},{v:"65+",l:"65 and above"},
-            ], 2)}</div>
+            ], "Select age range")}</div>
             <div>
               <Label>Country</Label>
               <Select value={a.country || "NG"} onValueChange={(v) => set("country", v)}>
@@ -227,16 +276,11 @@ const Survey = () => {
             )}
             <div>
               <Label>Accommodation Type</Label>
-              <Select value={a.q8 || ""} onValueChange={(v) => set("q8", v)}>
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Select accommodation type" /></SelectTrigger>
-                <SelectContent>
-                  {[
-                    ["tenement","Tenement (Face-Me-I-Face-You)"],["flat","Flat"],["bungalow","Bungalow"],
-                    ["duplex","Duplex"],["office","Office Space"],["shop","Shop or Store"],
-                    ["warehouse","Warehouse"],["other","Other"],
-                  ].map(([v,l]) => <SelectItem key={v} value={v}>{l}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              {SEL("q8", [
+                {v:"tenement",l:"Tenement (Face-Me-I-Face-You)"},{v:"flat",l:"Flat"},{v:"bungalow",l:"Bungalow"},
+                {v:"duplex",l:"Duplex"},{v:"office",l:"Office Space"},{v:"shop",l:"Shop or Store"},
+                {v:"warehouse",l:"Warehouse"},{v:"other",l:"Other"},
+              ], "Select accommodation type")}
             </div>
             {isResidential && (
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -249,50 +293,45 @@ const Survey = () => {
         )}
         {group === 3 && (
           <>
-            <div><Label>Are you currently a tenant?</Label>{RG("q9",[{v:"yes",l:"Yes"},{v:"no",l:"No"}],2)}</div>
+            <div><Label>Are you currently a tenant?</Label>{SEL("q9",[{v:"yes",l:"Yes"},{v:"no",l:"No"}], "Select an option")}</div>
             {isTenant && <>
-              <div><Label>Property type rented</Label>{RG("q10",[
+              <div><Label>Property type rented</Label>{SEL("q10",[
                 {v:"residential",l:"Residential"},{v:"commercial",l:"Commercial"},
                 {v:"warehousing",l:"Warehousing"},{v:"industrial",l:"Industrial"},{v:"multi",l:"More than one"},
-              ],2)}</div>
-              <div><Label>Annual rent</Label>{RG("q11",[
-                {v:"lt100k",l:"< ₦100k"},{v:"100-500k",l:"₦100k–₦500k"},{v:"501k-1m",l:"₦501k–₦1M"},
-                {v:"1-3m",l:"₦1M–₦3M"},{v:"3-10m",l:"₦3M–₦10M"},{v:"gt10m",l:"₦10M+"},
-              ],2)}</div>
-              <div><Label>Tenancy period</Label>{RG("q12",[{v:"yearly",l:"Yearly"},{v:"halfyearly",l:"Half Yearly"},{v:"quarterly",l:"Quarterly"},{v:"monthly",l:"Monthly"}],2)}</div>
-              <div><Label>How long a tenant?</Label>{RG("q13",[{v:"0-5",l:"0–5 yrs"},{v:"6-10",l:"6–10 yrs"},{v:"11-20",l:"11–20 yrs"},{v:"20+",l:"20+ yrs"}],2)}</div>
-              <div><Label>Who do you pay rent to?</Label>{RG("q14",[{v:"landlord",l:"Landlord directly"},{v:"agent",l:"Estate Agent"},{v:"other",l:"Other"}],3)}</div>
+              ], "Select property type")}</div>
+              <div><Label>Annual rent</Label>{SEL("q11",[
+                {v:"lt100k",l:"Less than ₦100k"},{v:"100-500k",l:"₦100k – ₦500k"},{v:"501k-1m",l:"₦501k – ₦1M"},
+                {v:"1-3m",l:"₦1M – ₦3M"},{v:"3-10m",l:"₦3M – ₦10M"},{v:"gt10m",l:"Above ₦10M"},
+              ], "Select rent range")}</div>
+              <div><Label>Tenancy period</Label>{SEL("q12",[{v:"yearly",l:"Yearly"},{v:"halfyearly",l:"Half Yearly"},{v:"quarterly",l:"Quarterly"},{v:"monthly",l:"Monthly"}], "Select tenancy period")}</div>
+              <div><Label>How long a tenant?</Label>{SEL("q13",[{v:"0-5",l:"0 – 5 years"},{v:"6-10",l:"6 – 10 years"},{v:"11-20",l:"11 – 20 years"},{v:"20+",l:"20+ years"}], "Select duration")}</div>
+              <div><Label>Who do you pay rent to?</Label>{SEL("q14",[{v:"landlord",l:"Landlord directly"},{v:"agent",l:"Estate Agent"},{v:"other",l:"Other"}], "Select recipient")}</div>
             </>}
           </>
         )}
         {group === 4 && isTenant && (
           <>
-            <div><Label>Rent payment ease (1=Very Easy, 5=Not Easy)</Label>{RG("q15",[
-              {v:"1",l:"1"},{v:"2",l:"2"},{v:"3",l:"3"},{v:"4",l:"4"},{v:"5",l:"5"},
-            ],5)}</div>
-            <div><Label>Pay on/before due date?</Label>{RG("q16",[{v:"always",l:"Always"},{v:"sometimes",l:"Sometimes"},{v:"never",l:"Never"}],3)}</div>
-            <div><Label>How do you currently pay rent?</Label>{RG("q17",[
+            <div><Label>Rent payment ease</Label>{SEL("q15",[
+              {v:"1",l:"1 — Very Easy"},{v:"2",l:"2 — Easy"},{v:"3",l:"3 — Neutral"},{v:"4",l:"4 — Difficult"},{v:"5",l:"5 — Not Easy"},
+            ], "Rate from 1 to 5")}</div>
+            <div><Label>Pay on/before due date?</Label>{SEL("q16",[{v:"always",l:"Always"},{v:"sometimes",l:"Sometimes"},{v:"never",l:"Never"}], "Select an option")}</div>
+            <div><Label>How do you currently pay rent?</Label>{SEL("q17",[
               {v:"save_up",l:"I save up gradually"},{v:"loan",l:"I take a loan"},
               {v:"advance",l:"Advance from work"},{v:"lump",l:"Wait for a lump sum"},{v:"other",l:"Other"},
-            ],2)}</div>
-            <div><Label>Sought help to pay rent before?</Label>{RG("q18",[{v:"yes",l:"Yes"},{v:"no",l:"No"}],2)}</div>
+            ], "Select payment method")}</div>
+            <div><Label>Sought help to pay rent before?</Label>{SEL("q18",[{v:"yes",l:"Yes"},{v:"no",l:"No"}], "Select an option")}</div>
           </>
         )}
         {group === 5 && (
           <>
-            <div><Label>Would you explore an online rent solution?</Label>{RG("q19",[{v:"yes",l:"Yes"},{v:"no",l:"No"},{v:"maybe",l:"Maybe"}],3)}</div>
+            <div><Label>Would you explore an online rent solution?</Label>{SEL("q19",[{v:"yes",l:"Yes"},{v:"no",l:"No"},{v:"maybe",l:"Maybe"}], "Select an option")}</div>
             <div><Label>How did you hear about Renteaze?</Label>
-              <Select value={a.q20||""} onValueChange={(v)=>set("q20",v)}>
-                <SelectTrigger className="mt-1"><SelectValue placeholder="Choose source" /></SelectTrigger>
-                <SelectContent>
-                  {[
-                    ["social","Social Media"],["friend","Referred by a friend"],["agent","Referred by an agent/professional"],
-                    ["search","Search engine"],["event","Event or seminar"],["ad","Advertisement"],["other","Other"],
-                  ].map(([v,l])=> <SelectItem key={v} value={v}>{l}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              {SEL("q20",[
+                {v:"social",l:"Social Media"},{v:"friend",l:"Referred by a friend"},{v:"agent",l:"Referred by an agent/professional"},
+                {v:"search",l:"Search engine"},{v:"event",l:"Event or seminar"},{v:"ad",l:"Advertisement"},{v:"other",l:"Other"},
+              ], "Choose source")}
             </div>
-            <div><Label>Happy to be contacted about relevant products?</Label>{RG("q21",[{v:"yes",l:"Yes"},{v:"no",l:"No"}],2)}</div>
+            <div><Label>Happy to be contacted about relevant products?</Label>{SEL("q21",[{v:"yes",l:"Yes"},{v:"no",l:"No"}], "Select an option")}</div>
           </>
         )}
 
@@ -301,7 +340,7 @@ const Survey = () => {
           {group < 5
             ? <Button onClick={next} className="bg-primary text-primary-foreground">Next</Button>
             : <Button onClick={submit} disabled={submitting} className="bg-accent text-accent-foreground">
-                {submitting ? "Saving..." : "Complete My Profile"}
+                {submitting ? "Saving..." : editMode ? "Save Changes" : "Complete My Profile"}
               </Button>}
         </div>
       </div>
