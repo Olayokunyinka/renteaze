@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Calendar, MapPin, Clock, User, Tag } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import Layout from "@/components/Layout";
+import Layout from "@/components/PortalAwareLayout";
 import EventRegistrationModal from "@/components/EventRegistrationModal";
 import { events, RenteazeEvent, EventAudience } from "@/data/events";
 
