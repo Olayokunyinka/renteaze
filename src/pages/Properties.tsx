@@ -4,7 +4,7 @@ import { Search, MapPin, Bed, Bath, Maximize, Home } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import Layout from "@/components/Layout";
+import Layout from "@/components/PortalAwareLayout";
 import { properties } from "@/data/properties";
 
 const Properties = () => {

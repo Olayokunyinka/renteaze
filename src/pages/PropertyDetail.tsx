@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import {
   Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious,
 } from "@/components/ui/carousel";
-import Layout from "@/components/Layout";
+import Layout from "@/components/PortalAwareLayout";
 import { properties } from "@/data/properties";
 
 const PropertyDetail = () => {
