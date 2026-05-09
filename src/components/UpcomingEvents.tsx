@@ -4,39 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import SectionHeading from "@/components/SectionHeading";
 import EventRegistrationModal from "@/components/EventRegistrationModal";
+import { events as allEvents, RenteazeEvent } from "@/data/events";
 
-const events = [
-  {
-    id: "1",
-    title: "Rent Smarter Lagos Seminar",
-    date: "May 24, 2026",
-    time: "10:00 AM WAT",
-    location: "Lagos Continental Hotel, Victoria Island",
-    type: "In-Person",
-    desc: "Learn how to break free from annual rent stress. Discover Save for Rent, Loan for Rent, and other Renteaze solutions live.",
-  },
-  {
-    id: "2",
-    title: "Diaspora Investment Webinar",
-    date: "June 7, 2026",
-    time: "2:00 PM GMT / 3:00 PM WAT",
-    location: "Online (Zoom)",
-    type: "Online",
-    desc: "Exclusive session for Nigerians abroad: learn how to invest in Lagos real estate with full transparency and professional management.",
-  },
-  {
-    id: "3",
-    title: "Landlord Masterclass: Maximize Your Returns",
-    date: "June 21, 2026",
-    time: "11:00 AM WAT",
-    location: "Renteaze Office, Ikeja",
-    type: "In-Person",
-    desc: "Property owners — discover guaranteed rent, professional management, and financing options to grow your portfolio.",
-  },
-];
+const events = allEvents.slice(0, 3);
 
 const UpcomingEvents = () => {
-  const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<RenteazeEvent | null>(null);
 
   return (
     <section className="py-16 md:py-20">

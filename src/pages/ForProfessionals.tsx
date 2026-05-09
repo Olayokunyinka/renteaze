@@ -63,7 +63,7 @@ const ForProfessionals = () => (
             Join the Renteaze partner network — estate agents, lawyers, surveyors, architects, and every kind of real estate professional are welcome.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row gap-4">
-            <Link to="/auth?role=professional">
+            <Link to="/signup?role=professional">
               <Button size="lg" className="bg-accent text-accent-foreground hover:opacity-90 gap-2">
                 Join the Programme <ArrowRight className="h-4 w-4" />
               </Button>
@@ -199,7 +199,7 @@ const ForProfessionals = () => (
           Sign up in minutes. Once approved, your unique referral code is live and the meter starts running.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/auth?role=professional">
+          <Link to="/signup?role=professional">
             <Button size="lg" className="bg-accent text-accent-foreground hover:opacity-90 gap-2">
               Apply to Join <ArrowRight className="h-4 w-4" />
             </Button>

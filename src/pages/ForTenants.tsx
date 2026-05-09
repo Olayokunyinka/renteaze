@@ -82,7 +82,7 @@ const RentCalculator = () => {
             <p className="text-sm text-muted-foreground">
               Save ₦{Math.round(monthly).toLocaleString()}/month for {months} months to cover your ₦{annualRent.toLocaleString()} annual rent.
             </p>
-            <Link to="/auth?role=tenant&product=save-for-rent">
+            <Link to="/signup?role=tenant&product=save-for-rent">
               <Button className="w-full mt-2 bg-accent text-accent-foreground hover:opacity-90 gap-2">
                 Start Saving Now <ArrowRight className="h-4 w-4" />
               </Button>
@@ -113,7 +113,7 @@ const ForTenants = () => (
                 Calculate Your Savings <Calculator className="h-4 w-4" />
               </Button>
             </a>
-            <Link to="/auth?role=tenant">
+            <Link to="/signup?role=tenant">
               <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary/20">
                 Create Account
               </Button>
@@ -136,7 +136,7 @@ const ForTenants = () => (
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{p.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
-                <Link to={`/auth?role=tenant&product=${p.slug}`}>
+                <Link to={`/signup?role=tenant&product=${p.slug}`}>
                   <Button variant="outline" size="sm" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground gap-1.5">
                     Apply Now <ArrowRight className="h-3.5 w-3.5" />
                   </Button>

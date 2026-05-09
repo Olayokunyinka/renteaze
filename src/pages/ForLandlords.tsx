@@ -41,7 +41,7 @@ const ForLandlords = () => (
                 List Your Property
               </Button>
             </a>
-            <Link to="/auth?role=landlord">
+            <Link to="/signup?role=landlord">
               <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary/20">
                 Create Account
               </Button>
@@ -75,7 +75,7 @@ const ForLandlords = () => (
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{p.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
-                <Link to={`/auth?role=landlord&product=${p.slug}`}>
+                <Link to={`/signup?role=landlord&product=${p.slug}`}>
                   <Button variant="outline" size="sm" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground gap-1.5">
                     Get Started <ArrowRight className="h-3.5 w-3.5" />
                   </Button>

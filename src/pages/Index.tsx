@@ -6,6 +6,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import Layout from "@/components/Layout";
 import SectionHeading from "@/components/SectionHeading";
 import UpcomingEvents from "@/components/UpcomingEvents";
+import { featuredProperties } from "@/data/properties";
+import { blogPosts } from "@/data/blog";
+import { Bed, Bath, Maximize, Calendar, Clock } from "lucide-react";
 
 const personas = [
   { label: "I'm a Tenant", path: "/for-tenants", icon: Home, desc: "Flexible rent solutions & savings plans" },
@@ -128,7 +131,7 @@ const Index = () => (
                 ))}
               </div>
               <div className="mt-8 text-center">
-                <Link to={`/auth?role=${tab.value}`}>
+                <Link to={`/signup?role=${tab.value}`}>
                   <Button className="bg-accent text-accent-foreground hover:opacity-90 gap-2">
                     Get Started as {tab.value === "tenant" ? "a Tenant" : tab.value === "landlord" ? "a Landlord" : "an Investor"} <ArrowRight className="h-4 w-4" />
                   </Button>
@@ -141,6 +144,92 @@ const Index = () => (
     </section>
 
     {/* Testimonials */}
+    {/* Featured Properties */}
+    <section className="py-16 md:py-20">
+      <div className="container mx-auto px-4 lg:px-8">
+        <SectionHeading
+          title="Featured Properties"
+          subtitle="A handpicked selection from our verified Lagos inventory."
+        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {featuredProperties.map((p) => (
+            <Link key={p.id} to={`/properties/${p.id}`} className="group">
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                <img src={p.images[0]} alt={p.title} className="w-full h-48 object-cover group-hover:scale-[1.02] transition-transform" loading="lazy" />
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-semibold px-2 py-1 rounded bg-primary/10 text-primary">{p.type}</span>
+                    <span className="font-bold text-primary text-sm">{p.price}</span>
+                  </div>
+                  <h3 className="font-semibold text-base">{p.title}</h3>
+                  <p className="text-xs text-muted-foreground mt-1">{p.location}</p>
+                  <div className="flex gap-3 text-xs text-muted-foreground mt-3">
+                    <span className="flex items-center gap-1"><Bed className="h-3 w-3" /> {p.beds}</span>
+                    <span className="flex items-center gap-1"><Bath className="h-3 w-3" /> {p.baths}</span>
+                    <span className="flex items-center gap-1"><Maximize className="h-3 w-3" /> {p.sqm}sqm</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link to="/properties" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+            View all properties <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+
+    {/* Latest Insights */}
+    <section className="py-16 md:py-20 bg-muted">
+      <div className="container mx-auto px-4 lg:px-8">
+        <SectionHeading
+          title="Latest Insights"
+          subtitle="Practical guides and market analysis for tenants, landlords, and investors."
+        />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {blogPosts.slice(0, 3).map((post) => (
+            <Link key={post.slug} to={`/blog/${post.slug}`} className="group">
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                <img src={post.image} alt={post.title} className="w-full h-40 object-cover group-hover:scale-[1.02] transition-transform" loading="lazy" />
+                <CardContent className="p-5">
+                  <span className="text-xs font-semibold px-2 py-1 rounded bg-primary/10 text-primary">{post.category}</span>
+                  <h3 className="font-semibold text-base mt-2 line-clamp-2">{post.title}</h3>
+                  <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{post.excerpt}</p>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground mt-3">
+                    <span className="flex items-center gap-1"><Calendar className="h-3 w-3" /> {new Date(post.date).toLocaleDateString("en-NG", { month: "short", day: "numeric" })}</span>
+                    <span className="flex items-center gap-1"><Clock className="h-3 w-3" /> {post.readTime}</span>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
+          ))}
+        </div>
+        <div className="text-center mt-8">
+          <Link to="/blog" className="inline-flex items-center gap-1 text-primary font-semibold hover:underline">
+            Read all insights <ArrowRight className="h-4 w-4" />
+          </Link>
+        </div>
+      </div>
+    </section>
+
+    {/* Partner Logos Strip */}
+    <section className="py-10 border-y bg-background">
+      <div className="container mx-auto px-4 lg:px-8">
+        <p className="text-center text-xs uppercase tracking-wider text-muted-foreground mb-5">
+          In good company
+        </p>
+        <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-3">
+          {["GTBank", "Stanbic IBTC", "MyCover.AI", "Bujeti", "Zed Crest"].map((name) => (
+            <span key={name} className="text-base md:text-lg font-semibold text-muted-foreground/70">
+              {name}
+            </span>
+          ))}
+        </div>
+      </div>
+    </section>
+
     <section className="py-16 md:py-20">
       <div className="container mx-auto px-4 lg:px-8">
         <SectionHeading title="What Our Clients Say" subtitle="Real stories from tenants, landlords, and investors across Nigeria." />
@@ -219,7 +308,7 @@ const Index = () => (
           Join thousands of Nigerians already renting smarter, owning faster, and investing better with Renteaze.
         </p>
         <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center">
-          <Link to="/auth">
+          <Link to="/signup">
             <Button size="lg" className="bg-accent text-accent-foreground hover:opacity-90">
               Create Your Account
             </Button>

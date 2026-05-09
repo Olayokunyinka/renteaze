@@ -40,7 +40,7 @@ const ForInvestors = () => (
                 Explore Opportunities
               </Button>
             </a>
-            <Link to="/auth?role=investor">
+            <Link to="/signup?role=investor">
               <Button size="lg" variant="outline" className="border-primary-foreground/30 text-primary-foreground hover:bg-primary/20">
                 Create Account
               </Button>
@@ -62,7 +62,7 @@ const ForInvestors = () => (
                 </div>
                 <h3 className="font-semibold text-lg mb-2">{p.title}</h3>
                 <p className="text-sm text-muted-foreground leading-relaxed mb-4 flex-1">{p.desc}</p>
-                <Link to={`/auth?role=investor&product=${p.slug}`}>
+                <Link to={`/signup?role=investor&product=${p.slug}`}>
                   <Button variant="outline" size="sm" className="w-full border-primary text-primary hover:bg-primary hover:text-primary-foreground gap-1.5">
                     Apply Now <ArrowRight className="h-3.5 w-3.5" />
                   </Button>

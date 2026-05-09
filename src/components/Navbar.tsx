@@ -11,9 +11,11 @@ const navLinks = [
       { label: "For Tenants", path: "/for-tenants" },
       { label: "For Landlords", path: "/for-landlords" },
       { label: "For Investors", path: "/for-investors" },
+      { label: "For Professionals", path: "/professionals" },
     ],
   },
   { label: "Properties", path: "/properties" },
+  { label: "Events", path: "/events" },
   { label: "About", path: "/about" },
   { label: "Blog", path: "/blog" },
   { label: "FAQ", path: "/faq" },
@@ -79,14 +81,14 @@ const Navbar = () => {
             )
           )}
           <Link
-            to="/auth?tab=signin"
+            to="/signin"
             className="ml-2 px-3 py-2 text-sm font-medium rounded-md hover:bg-primary/20 transition-colors inline-flex items-center gap-1.5"
           >
             <LogIn className="h-4 w-4" />
             Sign In
           </Link>
           <Link
-            to="/auth"
+            to="/signup"
             className="ml-1 px-4 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-md hover:opacity-90 transition-opacity"
           >
             Get Started
@@ -136,14 +138,14 @@ const Navbar = () => {
           )}
           <div className="px-4 pt-2 space-y-2">
             <Link
-              to="/auth?tab=signin"
+              to="/signin"
               onClick={() => setMobileOpen(false)}
               className="block text-center px-4 py-2 border border-primary/30 text-sm font-semibold rounded-md hover:bg-primary/20 transition-colors"
             >
               Sign In
             </Link>
             <Link
-              to="/auth"
+              to="/signup"
               onClick={() => setMobileOpen(false)}
               className="block text-center px-4 py-2 bg-accent text-accent-foreground text-sm font-semibold rounded-md"
             >
