@@ -1,10 +1,28 @@
 import { Link } from "react-router-dom";
-import { UserCheck, ArrowRight } from "lucide-react";
+import { UserCheck, ArrowRight, CheckCircle2, Pencil } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 
 const SurveyIncompleteBanner = () => {
   const { profile } = useAuth();
-  if (!profile || profile.survey_completed) return null;
+  if (!profile) return null;
+
+  if (profile.survey_completed) {
+    return (
+      <div className="bg-primary/5 border border-primary/20 text-foreground rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+        <CheckCircle2 className="h-5 w-5 text-primary flex-shrink-0" />
+        <p className="flex-1 text-sm">
+          <span className="font-semibold">Profile survey complete.</span>{" "}
+          <span className="text-muted-foreground">You can review or update your responses any time.</span>
+        </p>
+        <Link
+          to="/signup/survey"
+          className="inline-flex items-center gap-1.5 border border-primary/30 text-primary px-4 py-2 rounded-md text-sm font-semibold hover:bg-primary/10 whitespace-nowrap"
+        >
+          <Pencil className="h-3.5 w-3.5" /> View / Edit Responses
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-accent/15 border border-accent/40 text-foreground rounded-lg p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
