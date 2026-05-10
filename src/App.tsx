@@ -60,6 +60,8 @@ import LandlordDocuments from "./pages/portal/landlord/Documents";
 import LandlordMessages from "./pages/portal/landlord/Messages";
 import LandlordSettings from "./pages/portal/landlord/Settings";
 import LandlordProfile from "./pages/portal/landlord/Profile";
+import LandlordAddProperty from "./pages/portal/landlord/AddProperty";
+import LandlordPropertyDetail from "./pages/portal/landlord/PropertyDetail";
 
 import InvestorOpportunities from "./pages/portal/investor/Opportunities";
 import InvestorDeals from "./pages/portal/investor/Deals";
@@ -144,6 +146,8 @@ const App = () => (
 
           {/* Landlord sub-pages */}
           <Route path="/landlord/properties" element={<RequireAuth roles={["landlord"]}><LandlordProperties /></RequireAuth>} />
+          <Route path="/landlord/properties/add" element={<RequireAuth roles={["landlord"]}><LandlordAddProperty /></RequireAuth>} />
+          <Route path="/landlord/properties/:id" element={<RequireAuth roles={["landlord"]}><LandlordPropertyDetail /></RequireAuth>} />
           <Route path="/landlord/tenants" element={<RequireAuth roles={["landlord"]}><LandlordTenants /></RequireAuth>} />
           <Route path="/landlord/payments" element={<RequireAuth roles={["landlord"]}><LandlordPayments /></RequireAuth>} />
           <Route path="/landlord/maintenance" element={<RequireAuth roles={["landlord"]}><LandlordMaintenance /></RequireAuth>} />
