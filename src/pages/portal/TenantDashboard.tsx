@@ -2,7 +2,7 @@ import PortalShell from "@/components/portal/PortalShell";
 import SurveyIncompleteBanner from "@/components/portal/SurveyIncompleteBanner";
 import KycGate from "@/components/kyc/KycGate";
 import { useAuth } from "@/hooks/useAuth";
-import { PiggyBank, CreditCard, Home } from "lucide-react";
+import { PiggyBank, CreditCard, FileText } from "lucide-react";
 
 const TenantDashboard = () => {
   const { profile } = useAuth();
@@ -19,7 +19,7 @@ const TenantDashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card icon={PiggyBank} title="Save for Rent" body="Start a savings plan toward your next rent." />
           <Card icon={CreditCard} title="Loan for Rent" body="Apply for a rent loan with flexible terms." />
-          <Card icon={Home} title="Browse Properties" body="Find your next home from our verified listings." />
+          <Card icon={FileText} title="Rent Documents" body="Keep rent records and supporting documents in one place." />
         </div>
       )}
     </PortalShell>

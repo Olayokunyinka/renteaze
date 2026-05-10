@@ -157,7 +157,7 @@ const Survey = () => {
       }).eq("id", user.id);
       if (error) throw error;
       await refreshProfile();
-      toast.success(editMode ? "Responses updated!" : "Profile complete!", {
+      toast.success(editMode ? "Profile updated" : "Profile complete!", {
         description: editMode ? "Your changes have been saved." : "We have personalised your experience.",
       });
       navigate(dashboardPathForRole(roles[0]));
@@ -199,20 +199,28 @@ const Survey = () => {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">
-            {group === 1 && "Personal Background"}
-            {group === 2 && "Occupation & Living"}
-            {group === 3 && "Tenancy Details"}
-            {group === 4 && "Rent Payment Behaviour"}
-            {group === 5 && "Interest & Consent"}
+            {editMode ? "Update your profile" : (
+              <>
+                {group === 1 && "Personal Background"}
+                {group === 2 && "Occupation & Living"}
+                {group === 3 && "Tenancy Details"}
+                {group === 4 && "Rent Payment Behaviour"}
+                {group === 5 && "Interest & Consent"}
+              </>
+            )}
           </h1>
           {editMode && (
             <p className="text-xs text-muted-foreground mt-1">
-              You're editing your previously submitted responses.
+              {group === 1 && "Personal Background"}
+              {group === 2 && "Occupation & Living"}
+              {group === 3 && "Tenancy Details"}
+              {group === 4 && "Rent Payment Behaviour"}
+              {group === 5 && "Interest & Consent"}
             </p>
           )}
         </div>
         <button onClick={exit} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
-          {editMode ? "Back to dashboard" : "Skip for now"}
+          {editMode ? "Cancel" : "Skip for now"}
         </button>
       </div>
 
