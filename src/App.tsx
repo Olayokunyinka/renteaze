@@ -43,6 +43,8 @@ import AdminDashboard from "./pages/portal/AdminDashboard";
 
 import TenantSaveForRent from "./pages/portal/tenant/SaveForRent";
 import TenantLoans from "./pages/portal/tenant/Loans";
+import TenantApplyLoan from "./pages/portal/tenant/ApplyLoan";
+import TenantLoanDetail from "./pages/portal/tenant/LoanDetail";
 import TenantDocuments from "./pages/portal/tenant/Documents";
 import TenantStatements from "./pages/portal/tenant/Statements";
 import TenantMessages from "./pages/portal/tenant/Messages";
@@ -119,6 +121,8 @@ const App = () => (
           {/* Tenant sub-pages */}
           <Route path="/tenant/save-for-rent" element={<RequireAuth roles={["tenant"]}><TenantSaveForRent /></RequireAuth>} />
           <Route path="/tenant/loans" element={<RequireAuth roles={["tenant"]}><TenantLoans /></RequireAuth>} />
+          <Route path="/tenant/loans/apply" element={<RequireAuth roles={["tenant"]}><TenantApplyLoan /></RequireAuth>} />
+          <Route path="/tenant/loans/:id" element={<RequireAuth roles={["tenant"]}><TenantLoanDetail /></RequireAuth>} />
           <Route path="/tenant/documents" element={<RequireAuth roles={["tenant"]}><TenantDocuments /></RequireAuth>} />
           <Route path="/tenant/statements" element={<RequireAuth roles={["tenant"]}><TenantStatements /></RequireAuth>} />
           <Route path="/tenant/messages" element={<RequireAuth roles={["tenant"]}><TenantMessages /></RequireAuth>} />
