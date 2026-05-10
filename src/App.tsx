@@ -80,7 +80,7 @@ import AdminUsers from "./pages/portal/admin/Users";
 import AdminApplications from "./pages/portal/admin/Applications";
 import AdminProperties from "./pages/portal/admin/Properties";
 import AdminSettings from "./pages/portal/admin/Settings";
-import AdminProfile from "./pages/portal/admin/Profile";
+import PortalSurvey from "./pages/portal/PortalSurvey";
 
 const queryClient = new QueryClient();
 
@@ -113,7 +113,7 @@ const App = () => (
           <Route path="/signup/details" element={<SignUpDetails />} />
           <Route path="/signup/verify-phone" element={<VerifyPhone />} />
           <Route path="/signup/survey" element={<RequireAuth><Survey /></RequireAuth>} />
-          <Route path="/survey" element={<RequireAuth><Survey /></RequireAuth>} />
+          <Route path="/survey" element={<RequireAuth><PortalSurvey /></RequireAuth>} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
 
