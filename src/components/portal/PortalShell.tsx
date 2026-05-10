@@ -4,9 +4,10 @@ import {
   LayoutDashboard, Settings as SettingsIcon, LogOut, Bell, Menu, X,
   PiggyBank, CreditCard, FileText, BarChart2, Home, Calendar, MessageSquare,
   Building2, Users, Banknote, Wrench, TrendingUp, Briefcase, Share2,
-  DollarSign, BookOpen, Shield, UserCheck,
+  DollarSign, BookOpen, Shield,
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/hooks/useAuth";
+import UserMenu from "@/components/UserMenu";
 import logo from "@/assets/renteaze-logo-white.png";
 
 type NavItem = { label: string; path: string; icon: typeof Home };
@@ -116,15 +117,6 @@ const PortalShell = ({ role, children }: PortalShellProps) => {
         })}
       </nav>
       <div className="border-t border-white/10 py-2">
-        {role === "tenant" && (
-          <Link
-            to="/signup/survey"
-            onClick={() => setMobileOpen(false)}
-            className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10"
-          >
-            <UserCheck className="h-4 w-4" /> My Profile
-          </Link>
-        )}
         <Link
           to={`/${role === "admin" || role === "staff" ? "admin" : role}/settings`}
           onClick={() => setMobileOpen(false)}
@@ -172,9 +164,7 @@ const PortalShell = ({ role, children }: PortalShellProps) => {
             <button className="p-2 rounded-full hover:bg-muted" aria-label="Notifications">
               <Bell className="h-5 w-5" />
             </button>
-            <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xs font-semibold">
-              {(profile?.first_name?.[0] || "U").toUpperCase()}
-            </div>
+            <UserMenu role={role} />
           </div>
         </header>
 

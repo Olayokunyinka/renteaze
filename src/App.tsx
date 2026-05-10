@@ -49,6 +49,7 @@ import TenantDocuments from "./pages/portal/tenant/Documents";
 import TenantStatements from "./pages/portal/tenant/Statements";
 import TenantMessages from "./pages/portal/tenant/Messages";
 import TenantSettings from "./pages/portal/tenant/Settings";
+import TenantProfile from "./pages/portal/tenant/Profile";
 
 import LandlordProperties from "./pages/portal/landlord/Properties";
 import LandlordTenants from "./pages/portal/landlord/Tenants";
@@ -58,6 +59,7 @@ import LandlordFinancing from "./pages/portal/landlord/Financing";
 import LandlordDocuments from "./pages/portal/landlord/Documents";
 import LandlordMessages from "./pages/portal/landlord/Messages";
 import LandlordSettings from "./pages/portal/landlord/Settings";
+import LandlordProfile from "./pages/portal/landlord/Profile";
 
 import InvestorOpportunities from "./pages/portal/investor/Opportunities";
 import InvestorDeals from "./pages/portal/investor/Deals";
@@ -65,17 +67,20 @@ import InvestorDocuments from "./pages/portal/investor/Documents";
 import InvestorReports from "./pages/portal/investor/Reports";
 import InvestorMessages from "./pages/portal/investor/Messages";
 import InvestorSettings from "./pages/portal/investor/Settings";
+import InvestorProfile from "./pages/portal/investor/Profile";
 
 import ProfessionalReferrals from "./pages/portal/professional/Referrals";
 import ProfessionalCommissions from "./pages/portal/professional/Commissions";
 import ProfessionalResources from "./pages/portal/professional/Resources";
 import ProfessionalMessages from "./pages/portal/professional/Messages";
 import ProfessionalSettings from "./pages/portal/professional/Settings";
+import ProfessionalProfile from "./pages/portal/professional/Profile";
 
 import AdminUsers from "./pages/portal/admin/Users";
 import AdminApplications from "./pages/portal/admin/Applications";
 import AdminProperties from "./pages/portal/admin/Properties";
 import AdminSettings from "./pages/portal/admin/Settings";
+import AdminProfile from "./pages/portal/admin/Profile";
 
 const queryClient = new QueryClient();
 
@@ -117,6 +122,13 @@ const App = () => (
           <Route path="/investor/dashboard" element={<RequireAuth roles={["investor"]}><InvestorDashboard /></RequireAuth>} />
           <Route path="/professional/dashboard" element={<RequireAuth roles={["professional"]}><ProfessionalDashboard /></RequireAuth>} />
           <Route path="/admin/dashboard" element={<RequireAuth roles={["admin", "staff"]}><AdminDashboard /></RequireAuth>} />
+
+          {/* Profile pages */}
+          <Route path="/tenant/profile" element={<RequireAuth roles={["tenant"]}><TenantProfile /></RequireAuth>} />
+          <Route path="/landlord/profile" element={<RequireAuth roles={["landlord"]}><LandlordProfile /></RequireAuth>} />
+          <Route path="/investor/profile" element={<RequireAuth roles={["investor"]}><InvestorProfile /></RequireAuth>} />
+          <Route path="/professional/profile" element={<RequireAuth roles={["professional"]}><ProfessionalProfile /></RequireAuth>} />
+          <Route path="/admin/profile" element={<RequireAuth roles={["admin", "staff"]}><AdminProfile /></RequireAuth>} />
 
           {/* Tenant sub-pages */}
           <Route path="/tenant/save-for-rent" element={<RequireAuth roles={["tenant"]}><TenantSaveForRent /></RequireAuth>} />

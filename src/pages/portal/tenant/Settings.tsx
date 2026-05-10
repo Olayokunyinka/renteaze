@@ -1,10 +1,15 @@
 import PortalShell from "@/components/portal/PortalShell";
-import PortalPlaceholder from "@/components/portal/PortalPlaceholder";
-import { Settings as SettingsIcon } from "lucide-react";
+import SettingsForm from "@/components/SettingsForm";
 
 const Settings = () => (
   <PortalShell role="tenant">
-    <PortalPlaceholder icon={SettingsIcon} title="Settings" description="Update your profile, password and notification preferences." />
+    <div className="max-w-2xl">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Settings</h1>
+        <p className="text-muted-foreground">Manage your account, security, and notification preferences</p>
+      </div>
+      <SettingsForm />
+    </div>
   </PortalShell>
 );
 
