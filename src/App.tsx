@@ -43,6 +43,8 @@ import AdminDashboard from "./pages/portal/AdminDashboard";
 
 import TenantSaveForRent from "./pages/portal/tenant/SaveForRent";
 import TenantLoans from "./pages/portal/tenant/Loans";
+import TenantApplyLoan from "./pages/portal/tenant/ApplyLoan";
+import TenantLoanDetail from "./pages/portal/tenant/LoanDetail";
 import TenantDocuments from "./pages/portal/tenant/Documents";
 import TenantStatements from "./pages/portal/tenant/Statements";
 import TenantMessages from "./pages/portal/tenant/Messages";
