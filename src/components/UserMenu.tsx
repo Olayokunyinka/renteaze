@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { User, Settings as SettingsIcon, LogOut, ChevronDown } from "lucide-react";
+import { User, Settings as SettingsIcon, LogOut, ChevronDown, ClipboardList } from "lucide-react";
 import { useAuth, type AppRole } from "@/hooks/useAuth";
 
 interface UserMenuProps {
@@ -72,6 +72,13 @@ const UserMenu = ({ role = "tenant" }: UserMenuProps) => {
             >
               <User className="h-4 w-4" />
               My Profile
+            </button>
+            <button
+              onClick={() => handleNavigation("/survey")}
+              className="w-full flex items-center gap-3 px-4 py-2 text-sm hover:bg-muted transition-colors text-left"
+            >
+              <ClipboardList className="h-4 w-4" />
+              Survey
             </button>
             <button
               onClick={() => handleNavigation(`/${role === "admin" || role === "staff" ? "admin" : role}/settings`)}

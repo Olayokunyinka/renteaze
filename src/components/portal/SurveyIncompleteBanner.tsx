@@ -15,7 +15,7 @@ const SurveyIncompleteBanner = () => {
           <span className="text-muted-foreground">You can review or update your responses any time.</span>
         </p>
         <Link
-          to="/signup/survey"
+          to="/survey"
           className="inline-flex items-center gap-1.5 border border-primary/30 text-primary px-4 py-2 rounded-md text-sm font-semibold hover:bg-primary/10 whitespace-nowrap"
         >
           <Pencil className="h-3.5 w-3.5" /> View / Edit Responses
@@ -31,7 +31,7 @@ const SurveyIncompleteBanner = () => {
         <span className="font-semibold">Complete your profile</span> — it takes 2 minutes and helps us personalise your experience.
       </p>
       <Link
-        to="/signup/survey"
+        to="/survey"
         className="inline-flex items-center gap-1.5 bg-accent text-accent-foreground px-4 py-2 rounded-md text-sm font-semibold hover:opacity-90 whitespace-nowrap"
       >
         Complete Now <ArrowRight className="h-4 w-4" />

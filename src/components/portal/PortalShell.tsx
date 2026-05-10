@@ -4,7 +4,7 @@ import {
   LayoutDashboard, Settings as SettingsIcon, LogOut, Bell, Menu, X,
   PiggyBank, CreditCard, FileText, BarChart2, Home, Calendar, MessageSquare,
   Building2, Users, Banknote, Wrench, TrendingUp, Briefcase, Share2,
-  DollarSign, BookOpen, Shield,
+  DollarSign, BookOpen, Shield, ClipboardList,
 } from "lucide-react";
 import { useAuth, type AppRole } from "@/hooks/useAuth";
 import UserMenu from "@/components/UserMenu";
@@ -117,6 +117,13 @@ const PortalShell = ({ role, children }: PortalShellProps) => {
         })}
       </nav>
       <div className="border-t border-white/10 py-2">
+        <Link
+          to="/survey"
+          onClick={() => setMobileOpen(false)}
+          className="flex items-center gap-3 px-4 py-2.5 text-sm hover:bg-white/10"
+        >
+          <ClipboardList className="h-4 w-4" /> Profile Survey
+        </Link>
         <Link
           to={`/${role === "admin" || role === "staff" ? "admin" : role}/settings`}
           onClick={() => setMobileOpen(false)}
