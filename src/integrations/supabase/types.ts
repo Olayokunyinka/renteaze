@@ -14,6 +14,168 @@ export type Database = {
   }
   public: {
     Tables: {
+      documents: {
+        Row: {
+          created_at: string
+          document_type: Database["public"]["Enums"]["document_type"]
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_url: string
+          id: string
+          mime_type: string | null
+          owner_id: string
+          rejection_reason: string | null
+          status: Database["public"]["Enums"]["document_status"]
+          updated_at: string
+          verified_at: string | null
+          verified_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type: Database["public"]["Enums"]["document_type"]
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_url: string
+          id?: string
+          mime_type?: string | null
+          owner_id: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["document_status"]
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: Database["public"]["Enums"]["document_type"]
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_url?: string
+          id?: string
+          mime_type?: string | null
+          owner_id?: string
+          rejection_reason?: string | null
+          status?: Database["public"]["Enums"]["document_status"]
+          updated_at?: string
+          verified_at?: string | null
+          verified_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_verified_by_fkey"
+            columns: ["verified_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loan_applications: {
+        Row: {
+          annual_rent: number | null
+          approved_amount: number | null
+          created_at: string
+          disbursed_at: string | null
+          employer_name: string | null
+          employment_type: string | null
+          id: string
+          interest_rate: number | null
+          job_tenure: string | null
+          landlord_name: string | null
+          loan_amount_requested: number
+          monthly_income: number | null
+          monthly_repayment: number | null
+          next_due_date: string | null
+          outstanding_balance: number | null
+          product_type: Database["public"]["Enums"]["loan_product_type"]
+          property_address: string | null
+          rejection_reason: string | null
+          repayment_months: number | null
+          reviewed_by: string | null
+          staff_notes: string | null
+          status: Database["public"]["Enums"]["loan_status"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          annual_rent?: number | null
+          approved_amount?: number | null
+          created_at?: string
+          disbursed_at?: string | null
+          employer_name?: string | null
+          employment_type?: string | null
+          id?: string
+          interest_rate?: number | null
+          job_tenure?: string | null
+          landlord_name?: string | null
+          loan_amount_requested: number
+          monthly_income?: number | null
+          monthly_repayment?: number | null
+          next_due_date?: string | null
+          outstanding_balance?: number | null
+          product_type: Database["public"]["Enums"]["loan_product_type"]
+          property_address?: string | null
+          rejection_reason?: string | null
+          repayment_months?: number | null
+          reviewed_by?: string | null
+          staff_notes?: string | null
+          status?: Database["public"]["Enums"]["loan_status"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          annual_rent?: number | null
+          approved_amount?: number | null
+          created_at?: string
+          disbursed_at?: string | null
+          employer_name?: string | null
+          employment_type?: string | null
+          id?: string
+          interest_rate?: number | null
+          job_tenure?: string | null
+          landlord_name?: string | null
+          loan_amount_requested?: number
+          monthly_income?: number | null
+          monthly_repayment?: number | null
+          next_due_date?: string | null
+          outstanding_balance?: number | null
+          product_type?: Database["public"]["Enums"]["loan_product_type"]
+          property_address?: string | null
+          rejection_reason?: string | null
+          repayment_months?: number | null
+          reviewed_by?: string | null
+          staff_notes?: string | null
+          status?: Database["public"]["Enums"]["loan_status"]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_applications_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "loan_applications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notifications: {
         Row: {
           body: string | null
@@ -265,6 +427,135 @@ export type Database = {
           },
         ]
       }
+      savings_plans: {
+        Row: {
+          annual_rent_target: number
+          created_at: string
+          current_balance: number
+          id: string
+          monthly_contribution: number
+          months_completed: number
+          notes: string | null
+          product_type: Database["public"]["Enums"]["savings_product_type"]
+          start_date: string
+          status: Database["public"]["Enums"]["savings_plan_status"]
+          target_months: number
+          updated_at: string
+          user_id: string
+          virtual_account_number: string | null
+          virtual_bank_name: string | null
+        }
+        Insert: {
+          annual_rent_target: number
+          created_at?: string
+          current_balance?: number
+          id?: string
+          monthly_contribution: number
+          months_completed?: number
+          notes?: string | null
+          product_type?: Database["public"]["Enums"]["savings_product_type"]
+          start_date?: string
+          status?: Database["public"]["Enums"]["savings_plan_status"]
+          target_months?: number
+          updated_at?: string
+          user_id: string
+          virtual_account_number?: string | null
+          virtual_bank_name?: string | null
+        }
+        Update: {
+          annual_rent_target?: number
+          created_at?: string
+          current_balance?: number
+          id?: string
+          monthly_contribution?: number
+          months_completed?: number
+          notes?: string | null
+          product_type?: Database["public"]["Enums"]["savings_product_type"]
+          start_date?: string
+          status?: Database["public"]["Enums"]["savings_plan_status"]
+          target_months?: number
+          updated_at?: string
+          user_id?: string
+          virtual_account_number?: string | null
+          virtual_bank_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "savings_plans_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          direction: Database["public"]["Enums"]["transaction_direction"]
+          id: string
+          loan_id: string | null
+          occurred_at: string
+          plan_id: string | null
+          reference: string | null
+          status: Database["public"]["Enums"]["transaction_status"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          direction: Database["public"]["Enums"]["transaction_direction"]
+          id?: string
+          loan_id?: string | null
+          occurred_at?: string
+          plan_id?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          type: Database["public"]["Enums"]["transaction_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          direction?: Database["public"]["Enums"]["transaction_direction"]
+          id?: string
+          loan_id?: string | null
+          occurred_at?: string
+          plan_id?: string | null
+          reference?: string | null
+          status?: Database["public"]["Enums"]["transaction_status"]
+          type?: Database["public"]["Enums"]["transaction_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "transactions_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "savings_plans"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "transactions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -308,7 +599,52 @@ export type Database = {
         | "professional"
         | "staff"
         | "admin"
+      document_status: "pending" | "verified" | "rejected"
+      document_type:
+        | "government_id"
+        | "proof_of_income"
+        | "tenancy_agreement"
+        | "utility_bill"
+        | "title_deed"
+        | "loan_agreement"
+        | "passport"
+        | "proof_of_address"
+        | "tax_id"
+        | "other"
       kyc_status: "pending" | "verified" | "rejected"
+      loan_product_type:
+        | "loan_for_rent"
+        | "add_on_funds"
+        | "upgrade"
+        | "construction"
+        | "renovation"
+        | "repair"
+      loan_status:
+        | "submitted"
+        | "under_review"
+        | "approved"
+        | "disbursed"
+        | "active_repayment"
+        | "closed"
+        | "rejected"
+      savings_plan_status:
+        | "active"
+        | "completed"
+        | "disbursement_requested"
+        | "disbursed"
+        | "paused"
+        | "cancelled"
+      savings_product_type: "save_for_rent" | "save_to_own" | "save_for_house"
+      transaction_direction: "credit" | "debit"
+      transaction_status: "pending" | "confirmed" | "failed" | "reversed"
+      transaction_type:
+        | "savings_credit"
+        | "savings_debit"
+        | "loan_disbursement"
+        | "loan_repayment"
+        | "payout"
+        | "commission_payment"
+        | "manual_adjustment"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -445,7 +781,57 @@ export const Constants = {
         "staff",
         "admin",
       ],
+      document_status: ["pending", "verified", "rejected"],
+      document_type: [
+        "government_id",
+        "proof_of_income",
+        "tenancy_agreement",
+        "utility_bill",
+        "title_deed",
+        "loan_agreement",
+        "passport",
+        "proof_of_address",
+        "tax_id",
+        "other",
+      ],
       kyc_status: ["pending", "verified", "rejected"],
+      loan_product_type: [
+        "loan_for_rent",
+        "add_on_funds",
+        "upgrade",
+        "construction",
+        "renovation",
+        "repair",
+      ],
+      loan_status: [
+        "submitted",
+        "under_review",
+        "approved",
+        "disbursed",
+        "active_repayment",
+        "closed",
+        "rejected",
+      ],
+      savings_plan_status: [
+        "active",
+        "completed",
+        "disbursement_requested",
+        "disbursed",
+        "paused",
+        "cancelled",
+      ],
+      savings_product_type: ["save_for_rent", "save_to_own", "save_for_house"],
+      transaction_direction: ["credit", "debit"],
+      transaction_status: ["pending", "confirmed", "failed", "reversed"],
+      transaction_type: [
+        "savings_credit",
+        "savings_debit",
+        "loan_disbursement",
+        "loan_repayment",
+        "payout",
+        "commission_payment",
+        "manual_adjustment",
+      ],
     },
   },
 } as const
