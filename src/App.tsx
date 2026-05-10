@@ -80,6 +80,7 @@ import AdminUsers from "./pages/portal/admin/Users";
 import AdminApplications from "./pages/portal/admin/Applications";
 import AdminProperties from "./pages/portal/admin/Properties";
 import AdminSettings from "./pages/portal/admin/Settings";
+import AdminProfile from "./pages/portal/admin/Profile";
 import PortalSurvey from "./pages/portal/PortalSurvey";
 
 const queryClient = new QueryClient();
