@@ -62,15 +62,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } else {
         setLoading(true);
         // Defer DB calls so onAuthStateChange returns fast
-        setTimeout(() => loadProfile(s.user!), 0);
+        setTimeout(() => {
+          ensureProfileExists(s.user!).then(() => loadProfile(s.user!));
+        }, 0);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) loadProfile(s.user);
-      else setLoading(false);
+      if (s?.user) {
+        ensureProfileExists(s.user).then(() => loadProfile(s.user!));
+      } else {
+        setLoading(false);
+      }
     });
 
     return () => sub.subscription.unsubscribe();
@@ -82,11 +87,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", currentUser.id),
       ]);
-      setProfile(p as Profile | null);
+      
+      // Merge profile with auth user data as fallback
+      // This ensures email, first_name, last_name are always available
+      const mergedProfile: Profile | null = p ? {
+        ...p as Profile,
+        email: p.email || currentUser.email || null,
+        first_name: p.first_name || (currentUser.user_metadata?.first_name as string | undefined) || null,
+        last_name: p.last_name || (currentUser.user_metadata?.last_name as string | undefined) || null,
+        full_name: p.full_name || (currentUser.user_metadata?.first_name || currentUser.user_metadata?.last_name) ? 
+          `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim() || null
+          : null,
+        phone: p.phone || (currentUser.user_metadata?.phone as string | undefined) || null,
+      } : null;
+      
+      setProfile(mergedProfile);
       const dbRoles = (r ?? []).map((x: { role: AppRole }) => x.role).filter((role) => APP_ROLES.includes(role));
       setRoles(dbRoles.length > 0 ? dbRoles : [getFallbackRole(currentUser)]);
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function ensureProfileExists(currentUser: User) {
+    try {
+      // Check if profile exists
+      const { data: existing } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", currentUser.id)
+        .maybeSingle();
+
+      // If profile doesn't exist, create it with auth data
+      if (!existing) {
+        const { error } = await supabase.from("profiles").insert({
+          id: currentUser.id,
+          email: currentUser.email,
+          first_name: currentUser.user_metadata?.first_name || null,
+          last_name: currentUser.user_metadata?.last_name || null,
+          full_name: currentUser.user_metadata?.first_name || currentUser.user_metadata?.last_name ?
+            `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim()
+            : null,
+          phone: currentUser.user_metadata?.phone || null,
+        });
+        if (error && error.code !== 'PGRST116') { // Ignore unique constraint errors
+          console.error("Failed to ensure profile exists:", error);
+        }
+      }
+    } catch (err) {
+      console.error("Error in ensureProfileExists:", err);
     }
   }
 
