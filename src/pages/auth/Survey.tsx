@@ -27,65 +27,72 @@ const Survey = () => {
   const [officeCoords, setOfficeCoords] = useState<Coords | null>(null);
 
   const editMode = !!profile?.survey_completed;
+  const draftKey = user ? `survey-draft-${user.id}` : "";
 
-  // Prefill from existing profile data
+  // Hydrate ONCE: from localStorage draft first, then merge profile values for any blank field.
+  // Subsequent profile refreshes (e.g. after saveProgress) must NOT overwrite live form state.
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    if (!profile) return;
+    if (hydrated || !profile || !user) return;
     const p = profile as Record<string, unknown>;
     const get = (k: string) => (p[k] == null ? "" : String(p[k]));
-    setA({
+    const fromProfile: Record<string, string> = {
       country: get("country") || "NG",
-      q1: get("gender"),
-      q2: get("marital_status"),
-      q3: get("age_range"),
-      q4: get("state_of_residence"),
-      q5: get("address_of_residence"),
-      q6: get("occupation"),
-      q7: get("office_address"),
-      q8: get("accommodation_type"),
-      bedrooms: get("bedrooms"),
-      bathrooms: get("bathrooms"),
-      toilets: get("toilets"),
+      q1: get("gender"), q2: get("marital_status"), q3: get("age_range"),
+      q4: get("state_of_residence"), q5: get("address_of_residence"),
+      q6: get("occupation"), q7: get("office_address"), q8: get("accommodation_type"),
+      bedrooms: get("bedrooms"), bathrooms: get("bathrooms"), toilets: get("toilets"),
       q9: p.is_current_tenant === true ? "yes" : p.is_current_tenant === false ? "no" : "",
-      q10: get("tenancy_property_type"),
-      q11: get("annual_rent_range"),
-      q12: get("tenancy_period"),
-      q13: get("tenancy_duration"),
-      q14: get("pays_rent_to"),
-      q15: get("rent_payment_ease"),
-      q16: get("pays_on_time"),
-      q17: get("rent_payment_method"),
+      q10: get("tenancy_property_type"), q11: get("annual_rent_range"),
+      q12: get("tenancy_period"), q13: get("tenancy_duration"), q14: get("pays_rent_to"),
+      q15: get("rent_payment_ease"), q16: get("pays_on_time"), q17: get("rent_payment_method"),
       q18: p.sought_rent_help_before === true ? "yes" : p.sought_rent_help_before === false ? "no" : "",
-      q19: get("interested_in_platform"),
-      q20: get("acquisition_source"),
+      q19: get("interested_in_platform"), q20: get("acquisition_source"),
       q21: p.marketing_consent === true ? "yes" : p.marketing_consent === false ? "no" : "",
-    });
-    if (p.address_lat && p.address_lon) setResidenceCoords({ lat: Number(p.address_lat), lon: Number(p.address_lon) });
-    if (p.office_lat && p.office_lon) setOfficeCoords({ lat: Number(p.office_lat), lon: Number(p.office_lon) });
-  }, [profile]);
+    };
+    let draft: { a?: Record<string, string>; group?: number; residenceCoords?: Coords; officeCoords?: Coords } = {};
+    try {
+      const raw = localStorage.getItem(`survey-draft-${user.id}`);
+      if (raw) draft = JSON.parse(raw);
+    } catch { /* ignore */ }
 
-  // Resume at first incomplete group (only on initial load, and only if survey not yet completed)
-  const [resumed, setResumed] = useState(false);
+    // Draft answers win over profile (user's most recent in-progress edits)
+    const merged = { ...fromProfile, ...(draft.a || {}) };
+    setA(merged);
+    if (draft.residenceCoords) setResidenceCoords(draft.residenceCoords);
+    else if (p.address_lat && p.address_lon) setResidenceCoords({ lat: Number(p.address_lat), lon: Number(p.address_lon) });
+    if (draft.officeCoords) setOfficeCoords(draft.officeCoords);
+    else if (p.office_lat && p.office_lon) setOfficeCoords({ lat: Number(p.office_lat), lon: Number(p.office_lon) });
+
+    // Pick starting group: draft.group, else first incomplete from profile
+    if (draft.group && draft.group >= 1 && draft.group <= 5 && !p.survey_completed) {
+      setGroup(draft.group);
+    } else if (!p.survey_completed) {
+      const has = (k: string) => p[k] != null && p[k] !== "";
+      const g1Done = has("gender") && has("marital_status") && has("age_range") && has("state_of_residence") && has("address_of_residence");
+      const g2Done = has("occupation") && has("accommodation_type");
+      const tenant = p.is_current_tenant === true;
+      const tenantAnswered = p.is_current_tenant != null;
+      const g3Done = tenantAnswered && (!tenant || (has("tenancy_property_type") && has("annual_rent_range") && has("tenancy_period") && has("tenancy_duration") && has("pays_rent_to")));
+      const g4Done = !tenant || (has("rent_payment_ease") && has("pays_on_time") && has("rent_payment_method") && p.sought_rent_help_before != null);
+      let start = 1;
+      if (g1Done) start = 2;
+      if (g1Done && g2Done) start = 3;
+      if (g1Done && g2Done && g3Done) start = tenant ? 4 : 5;
+      if (g1Done && g2Done && g3Done && g4Done) start = 5;
+      setGroup(start);
+    }
+    setHydrated(true);
+  }, [profile, user, hydrated]);
+
+  // Persist draft to localStorage on every change (after hydration) — bullet-proof against
+  // network/RLS save failures so the user never loses progress.
   useEffect(() => {
-    if (resumed || !profile) return;
-    const p = profile as Record<string, unknown>;
-    if (p.survey_completed) { setResumed(true); return; }
-    // Determine first incomplete group from saved profile fields
-    const has = (k: string) => p[k] != null && p[k] !== "";
-    const g1Done = has("gender") && has("marital_status") && has("age_range") && has("state_of_residence") && has("address_of_residence");
-    const g2Done = has("occupation") && has("accommodation_type");
-    const tenant = p.is_current_tenant === true;
-    const tenantAnswered = p.is_current_tenant != null;
-    const g3Done = tenantAnswered && (!tenant || (has("tenancy_property_type") && has("annual_rent_range") && has("tenancy_period") && has("tenancy_duration") && has("pays_rent_to")));
-    const g4Done = !tenant || (has("rent_payment_ease") && has("pays_on_time") && has("rent_payment_method") && p.sought_rent_help_before != null);
-    let start = 1;
-    if (g1Done) start = 2;
-    if (g1Done && g2Done) start = 3;
-    if (g1Done && g2Done && g3Done) start = tenant ? 4 : 5;
-    if (g1Done && g2Done && g3Done && g4Done) start = 5;
-    setGroup(start);
-    setResumed(true);
-  }, [profile, resumed]);
+    if (!hydrated || !draftKey) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ a, group, residenceCoords, officeCoords }));
+    } catch { /* ignore quota */ }
+  }, [a, group, residenceCoords, officeCoords, hydrated, draftKey]);
 
   const set = (k: string, v: string) => setA((prev) => ({ ...prev, [k]: v }));
   const isTenant = a.q9 === "yes";
@@ -148,17 +155,22 @@ const Survey = () => {
     return payload;
   };
 
-  const saveProgress = async () => {
-    if (!user) return;
+  const saveProgress = async (): Promise<boolean> => {
+    if (!user) return false;
     const payload = buildPartialPayload();
-    if (Object.keys(payload).length === 0) return;
+    if (Object.keys(payload).length === 0) return true;
     const { error } = await supabase.from("profiles").update(payload as never).eq("id", user.id);
-    if (error) { console.error("Survey progress save failed", error); return; }
+    if (error) {
+      console.error("Survey progress save failed", error);
+      toast.error("Could not save your progress", { description: error.message });
+      return false;
+    }
     await refreshProfile();
+    return true;
   };
 
   const handleSkip = async () => {
-    await saveProgress();
+    await saveProgress(); // even if it fails, draft is in localStorage
     navigate(dashboardPathForRole(roles[0]));
   };
 
@@ -172,6 +184,7 @@ const Survey = () => {
     if (n === 4 && !isTenant) n = 5;
     setGroup(Math.min(n, 5));
   };
+
   const back = () => {
     let n = group - 1;
     if (n === 4 && !isTenant) n = 3;
@@ -231,6 +244,7 @@ const Survey = () => {
       }
 
       await refreshProfile();
+      try { if (draftKey) localStorage.removeItem(draftKey); } catch { /* ignore */ }
       toast.success(editMode ? "Profile updated" : "Profile complete!", {
         description: editMode ? "Your changes have been saved." : "We have personalised your experience.",
       });
