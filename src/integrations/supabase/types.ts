@@ -250,6 +250,7 @@ export type Database = {
           address_of_residence: string | null
           age_range: string | null
           annual_rent_range: string | null
+          avatar_url: string | null
           bank_account_number: string | null
           bank_name: string | null
           bathrooms: number | null
@@ -273,6 +274,7 @@ export type Database = {
           marketing_consent: boolean
           nin: string | null
           nin_verified: boolean
+          notification_preferences: Json
           occupation: string | null
           office_address: string | null
           office_lat: number | null
@@ -309,6 +311,7 @@ export type Database = {
           address_of_residence?: string | null
           age_range?: string | null
           annual_rent_range?: string | null
+          avatar_url?: string | null
           bank_account_number?: string | null
           bank_name?: string | null
           bathrooms?: number | null
@@ -332,6 +335,7 @@ export type Database = {
           marketing_consent?: boolean
           nin?: string | null
           nin_verified?: boolean
+          notification_preferences?: Json
           occupation?: string | null
           office_address?: string | null
           office_lat?: number | null
@@ -368,6 +372,7 @@ export type Database = {
           address_of_residence?: string | null
           age_range?: string | null
           annual_rent_range?: string | null
+          avatar_url?: string | null
           bank_account_number?: string | null
           bank_name?: string | null
           bathrooms?: number | null
@@ -391,6 +396,7 @@ export type Database = {
           marketing_consent?: boolean
           nin?: string | null
           nin_verified?: boolean
+          notification_preferences?: Json
           occupation?: string | null
           office_address?: string | null
           office_lat?: number | null

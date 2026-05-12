@@ -64,6 +64,29 @@ const Survey = () => {
     if (p.office_lat && p.office_lon) setOfficeCoords({ lat: Number(p.office_lat), lon: Number(p.office_lon) });
   }, [profile]);
 
+  // Resume at first incomplete group (only on initial load, and only if survey not yet completed)
+  const [resumed, setResumed] = useState(false);
+  useEffect(() => {
+    if (resumed || !profile) return;
+    const p = profile as Record<string, unknown>;
+    if (p.survey_completed) { setResumed(true); return; }
+    // Determine first incomplete group from saved profile fields
+    const has = (k: string) => p[k] != null && p[k] !== "";
+    const g1Done = has("gender") && has("marital_status") && has("age_range") && has("state_of_residence") && has("address_of_residence");
+    const g2Done = has("occupation") && has("accommodation_type");
+    const tenant = p.is_current_tenant === true;
+    const tenantAnswered = p.is_current_tenant != null;
+    const g3Done = tenantAnswered && (!tenant || (has("tenancy_property_type") && has("annual_rent_range") && has("tenancy_period") && has("tenancy_duration") && has("pays_rent_to")));
+    const g4Done = !tenant || (has("rent_payment_ease") && has("pays_on_time") && has("rent_payment_method") && p.sought_rent_help_before != null);
+    let start = 1;
+    if (g1Done) start = 2;
+    if (g1Done && g2Done) start = 3;
+    if (g1Done && g2Done && g3Done) start = tenant ? 4 : 5;
+    if (g1Done && g2Done && g3Done && g4Done) start = 5;
+    setGroup(start);
+    setResumed(true);
+  }, [profile, resumed]);
+
   const set = (k: string, v: string) => setA((prev) => ({ ...prev, [k]: v }));
   const isTenant = a.q9 === "yes";
   const occupationLower = (a.q6 || "").toLowerCase().trim();
@@ -93,11 +116,58 @@ const Survey = () => {
     return true;
   };
 
-  const next = () => {
+  const buildPartialPayload = () => {
+    const payload: Record<string, unknown> = {};
+    if (a.country) payload.country = a.country;
+    if (a.q1) payload.gender = a.q1;
+    if (a.q2) payload.marital_status = a.q2;
+    if (a.q3) payload.age_range = a.q3;
+    if (a.q4) payload.state_of_residence = a.q4;
+    if (a.q5) payload.address_of_residence = a.q5;
+    if (residenceCoords) { payload.address_lat = residenceCoords.lat; payload.address_lon = residenceCoords.lon; }
+    if (a.q6) payload.occupation = a.q6;
+    if (a.q7) payload.office_address = a.q7;
+    if (officeCoords) { payload.office_lat = officeCoords.lat; payload.office_lon = officeCoords.lon; }
+    if (a.q8) payload.accommodation_type = a.q8;
+    if (isResidential && a.bedrooms) payload.bedrooms = parseInt(a.bedrooms);
+    if (isResidential && a.bathrooms) payload.bathrooms = parseInt(a.bathrooms);
+    if (isResidential && a.toilets) payload.toilets = parseInt(a.toilets);
+    if (a.q9) payload.is_current_tenant = a.q9 === "yes";
+    if (a.q10) payload.tenancy_property_type = a.q10;
+    if (a.q11) payload.annual_rent_range = a.q11;
+    if (a.q12) payload.tenancy_period = a.q12;
+    if (a.q13) payload.tenancy_duration = a.q13;
+    if (a.q14) payload.pays_rent_to = a.q14;
+    if (a.q15) payload.rent_payment_ease = parseInt(a.q15);
+    if (a.q16) payload.pays_on_time = a.q16;
+    if (a.q17) payload.rent_payment_method = a.q17;
+    if (a.q18) payload.sought_rent_help_before = a.q18 === "yes";
+    if (a.q19) payload.interested_in_platform = a.q19;
+    if (a.q20) payload.acquisition_source = a.q20;
+    if (a.q21) payload.marketing_consent = a.q21 === "yes";
+    return payload;
+  };
+
+  const saveProgress = async () => {
+    if (!user) return;
+    const payload = buildPartialPayload();
+    if (Object.keys(payload).length === 0) return;
+    const { error } = await supabase.from("profiles").update(payload as never).eq("id", user.id);
+    if (error) { console.error("Survey progress save failed", error); return; }
+    await refreshProfile();
+  };
+
+  const handleSkip = async () => {
+    await saveProgress();
+    navigate(dashboardPathForRole(roles[0]));
+  };
+
+  const next = async () => {
     if (!validateGroup(group)) {
       toast.error("Please answer all questions in this group");
       return;
     }
+    await saveProgress();
     let n = group + 1;
     if (n === 4 && !isTenant) n = 5;
     setGroup(Math.min(n, 5));
@@ -129,7 +199,7 @@ const Survey = () => {
       if (a.q9 === "no") tags.push("NON_TENANT");
       if (a.q19 === "yes") tags.push("HIGH_INTENT");
 
-      const { error } = await supabase.from("profiles").update({
+      const { data: updated, error } = await supabase.from("profiles").update({
         survey_completed: true,
         survey_completed_at: new Date().toISOString(),
         country: a.country,
@@ -154,47 +224,12 @@ const Survey = () => {
         interested_in_platform: a.q19, acquisition_source: a.q20,
         marketing_consent: a.q21 === "yes",
         crm_tags: tags,
-      }).eq("id", user.id);
+      }).eq("id", user.id).select("id");
       if (error) throw error;
-      
-      // Verify the update actually affected rows
-      const { count } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("id", user.id);
-      
-      if (count === 0) {
-        // Profile doesn't exist, create it
-        const { error: insertError } = await supabase.from("profiles").insert({
-          id: user.id,
-          survey_completed: true,
-          survey_completed_at: new Date().toISOString(),
-          country: a.country,
-          gender: a.q1, marital_status: a.q2, age_range: a.q3,
-          state_of_residence: a.q4, address_of_residence: a.q5,
-          address_lat: residenceCoords?.lat ?? null,
-          address_lon: residenceCoords?.lon ?? null,
-          occupation: a.q6, office_address: a.q7 || null,
-          office_lat: officeCoords?.lat ?? null,
-          office_lon: officeCoords?.lon ?? null,
-          accommodation_type: a.q8,
-          bedrooms: isResidential && a.bedrooms ? parseInt(a.bedrooms) : null,
-          bathrooms: isResidential && a.bathrooms ? parseInt(a.bathrooms) : null,
-          toilets: isResidential && a.toilets ? parseInt(a.toilets) : null,
-          is_current_tenant: a.q9 === "yes",
-          tenancy_property_type: a.q10 || null, annual_rent_range: a.q11 || null,
-          tenancy_period: a.q12 || null, tenancy_duration: a.q13 || null,
-          pays_rent_to: a.q14 || null,
-          rent_payment_ease: a.q15 ? parseInt(a.q15) : null,
-          pays_on_time: a.q16 || null, rent_payment_method: a.q17 || null,
-          sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
-          interested_in_platform: a.q19, acquisition_source: a.q20,
-          marketing_consent: a.q21 === "yes",
-          crm_tags: tags,
-        });
-        if (insertError) throw insertError;
+      if (!updated || updated.length === 0) {
+        throw new Error("Could not save your profile. Please sign out and sign in again, then retry.");
       }
-      
+
       await refreshProfile();
       toast.success(editMode ? "Profile updated" : "Profile complete!", {
         description: editMode ? "Your changes have been saved." : "We have personalised your experience.",
@@ -258,7 +293,7 @@ const Survey = () => {
             </p>
           )}
         </div>
-        <button onClick={exit} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
+        <button onClick={editMode ? exit : handleSkip} className="text-xs text-muted-foreground hover:text-foreground whitespace-nowrap">
           {editMode ? "Cancel" : "Skip for now"}
         </button>
       </div>

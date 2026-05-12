@@ -53,18 +53,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Subscribe FIRST to avoid race conditions
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (!s?.user) {
+      if (event === "SIGNED_OUT" || !s?.user) {
         setProfile(null);
         setRoles([]);
+        setLoading(false);
       } else {
         setLoading(true);
         // Defer DB calls so onAuthStateChange returns fast
-        setTimeout(() => {
-          ensureProfileExists(s.user!).then(() => loadProfile(s.user!));
-        }, 0);
+        setTimeout(() => { loadProfile(s.user!); }, 0);
       }
     });
 
@@ -72,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(s);
       setUser(s?.user ?? null);
       if (s?.user) {
-        ensureProfileExists(s.user).then(() => loadProfile(s.user!));
+        loadProfile(s.user);
       } else {
         setLoading(false);
       }
@@ -83,10 +82,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadProfile(currentUser: User) {
     try {
-      const [{ data: p }, { data: r }] = await Promise.all([
+      let [{ data: p }, { data: r }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", currentUser.id),
       ]);
+
+      // Retry once if profile didn't load — defeats early auth-event race where
+      // the JWT hasn't been attached to PostgREST yet.
+      if (!p) {
+        await supabase.auth.getSession();
+        const retry = await supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
+        p = retry.data;
+        if (!r || r.length === 0) {
+          const rr = await supabase.from("user_roles").select("role").eq("user_id", currentUser.id);
+          r = rr.data;
+        }
+      }
       
       // Merge profile with auth user data as fallback
       // This ensures email, first_name, last_name are always available
@@ -106,36 +117,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRoles(dbRoles.length > 0 ? dbRoles : [getFallbackRole(currentUser)]);
     } finally {
       setLoading(false);
-    }
-  }
-
-  async function ensureProfileExists(currentUser: User) {
-    try {
-      // Check if profile exists
-      const { data: existing } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", currentUser.id)
-        .maybeSingle();
-
-      // If profile doesn't exist, create it with auth data
-      if (!existing) {
-        const { error } = await supabase.from("profiles").insert({
-          id: currentUser.id,
-          email: currentUser.email,
-          first_name: currentUser.user_metadata?.first_name || null,
-          last_name: currentUser.user_metadata?.last_name || null,
-          full_name: currentUser.user_metadata?.first_name || currentUser.user_metadata?.last_name ?
-            `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim()
-            : null,
-          phone: currentUser.user_metadata?.phone || null,
-        });
-        if (error && error.code !== 'PGRST116') { // Ignore unique constraint errors
-          console.error("Failed to ensure profile exists:", error);
-        }
-      }
-    } catch (err) {
-      console.error("Error in ensureProfileExists:", err);
     }
   }
 
