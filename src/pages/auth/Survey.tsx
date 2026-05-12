@@ -244,6 +244,7 @@ const Survey = () => {
       }
 
       await refreshProfile();
+      try { if (draftKey) localStorage.removeItem(draftKey); } catch { /* ignore */ }
       toast.success(editMode ? "Profile updated" : "Profile complete!", {
         description: editMode ? "Your changes have been saved." : "We have personalised your experience.",
       });
