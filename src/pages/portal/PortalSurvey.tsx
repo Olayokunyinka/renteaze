@@ -419,8 +419,7 @@ const PortalSurvey = () => {
                   <Label>Office Address</Label>
                   <AddressAutocomplete
                     value={a.q7 || ""}
-                    onChange={(v) => set("q7", v)}
-                    onCoordsChange={setOfficeCoords}
+                    onChange={(v, coords) => { set("q7", v); if (coords) setOfficeCoords(coords); }}
                     placeholder="Enter your office address"
                   />
                 </div>
