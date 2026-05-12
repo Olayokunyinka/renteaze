@@ -171,6 +171,45 @@ const PortalSurvey = () => {
       }).eq("id", user.id);
 
       if (error) throw error;
+      
+      // Verify the update actually affected rows
+      const { count } = await supabase
+        .from("profiles")
+        .select("*", { count: "exact", head: true })
+        .eq("id", user.id);
+      
+      if (count === 0) {
+        // Profile doesn't exist, create it
+        const { error: insertError } = await supabase.from("profiles").insert({
+          id: user.id,
+          survey_completed: true,
+          survey_completed_at: new Date().toISOString(),
+          country: a.country,
+          gender: a.q1, marital_status: a.q2, age_range: a.q3,
+          state_of_residence: a.q4, address_of_residence: a.q5,
+          address_lat: residenceCoords?.lat ?? null,
+          address_lon: residenceCoords?.lon ?? null,
+          occupation: a.q6, office_address: a.q7 || null,
+          office_lat: officeCoords?.lat ?? null,
+          office_lon: officeCoords?.lon ?? null,
+          accommodation_type: a.q8,
+          bedrooms: isResidential && a.bedrooms ? parseInt(a.bedrooms) : null,
+          bathrooms: isResidential && a.bathrooms ? parseInt(a.bathrooms) : null,
+          toilets: isResidential && a.toilets ? parseInt(a.toilets) : null,
+          is_current_tenant: a.q9 === "yes",
+          tenancy_property_type: a.q10 || null, annual_rent_range: a.q11 || null,
+          tenancy_period: a.q12 || null, tenancy_duration: a.q13 || null,
+          pays_rent_to: a.q14 || null,
+          rent_payment_ease: a.q15 ? parseInt(a.q15) : null,
+          pays_on_time: a.q16 || null, rent_payment_method: a.q17 || null,
+          sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
+          interested_in_platform: a.q19, acquisition_source: a.q20,
+          marketing_consent: a.q21 === "yes",
+          crm_tags: tags,
+        });
+        if (insertError) throw insertError;
+      }
+      
       await refreshProfile();
       toast.success(editMode ? "Profile updated" : "Profile complete!", {
         description: editMode ? "Your changes have been saved." : "We have personalised your experience.",

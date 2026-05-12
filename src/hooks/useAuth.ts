@@ -53,24 +53,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Subscribe FIRST to avoid race conditions
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => {
+    const { data: sub } = supabase.auth.onAuthStateChange((event, s) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (!s?.user) {
+      if (event === "SIGNED_OUT" || !s?.user) {
         setProfile(null);
         setRoles([]);
+        setLoading(false);
       } else {
         setLoading(true);
         // Defer DB calls so onAuthStateChange returns fast
-        setTimeout(() => loadProfile(s.user!), 0);
+        setTimeout(() => { loadProfile(s.user!); }, 0);
       }
     });
 
     supabase.auth.getSession().then(({ data: { session: s } }) => {
       setSession(s);
       setUser(s?.user ?? null);
-      if (s?.user) loadProfile(s.user);
-      else setLoading(false);
+      if (s?.user) {
+        loadProfile(s.user);
+      } else {
+        setLoading(false);
+      }
     });
 
     return () => sub.subscription.unsubscribe();
@@ -78,11 +82,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadProfile(currentUser: User) {
     try {
-      const [{ data: p }, { data: r }] = await Promise.all([
+      let [{ data: p }, { data: r }] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle(),
         supabase.from("user_roles").select("role").eq("user_id", currentUser.id),
       ]);
-      setProfile(p as Profile | null);
+
+      // Retry once if profile didn't load — defeats early auth-event race where
+      // the JWT hasn't been attached to PostgREST yet.
+      if (!p) {
+        await supabase.auth.getSession();
+        const retry = await supabase.from("profiles").select("*").eq("id", currentUser.id).maybeSingle();
+        p = retry.data;
+        if (!r || r.length === 0) {
+          const rr = await supabase.from("user_roles").select("role").eq("user_id", currentUser.id);
+          r = rr.data;
+        }
+      }
+      
+      // Merge profile with auth user data as fallback
+      // This ensures email, first_name, last_name are always available
+      const mergedProfile: Profile | null = p ? {
+        ...p as Profile,
+        email: p.email || currentUser.email || null,
+        first_name: p.first_name || (currentUser.user_metadata?.first_name as string | undefined) || null,
+        last_name: p.last_name || (currentUser.user_metadata?.last_name as string | undefined) || null,
+        full_name: p.full_name || (currentUser.user_metadata?.first_name || currentUser.user_metadata?.last_name) ? 
+          `${currentUser.user_metadata?.first_name || ''} ${currentUser.user_metadata?.last_name || ''}`.trim() || null
+          : null,
+        phone: p.phone || (currentUser.user_metadata?.phone as string | undefined) || null,
+      } : null;
+      
+      setProfile(mergedProfile);
       const dbRoles = (r ?? []).map((x: { role: AppRole }) => x.role).filter((role) => APP_ROLES.includes(role));
       setRoles(dbRoles.length > 0 ? dbRoles : [getFallbackRole(currentUser)]);
     } finally {
