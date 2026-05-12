@@ -185,16 +185,6 @@ const Survey = () => {
     setGroup(Math.min(n, 5));
   };
 
-  const next = async () => {
-    if (!validateGroup(group)) {
-      toast.error("Please answer all questions in this group");
-      return;
-    }
-    await saveProgress();
-    let n = group + 1;
-    if (n === 4 && !isTenant) n = 5;
-    setGroup(Math.min(n, 5));
-  };
   const back = () => {
     let n = group - 1;
     if (n === 4 && !isTenant) n = 3;
