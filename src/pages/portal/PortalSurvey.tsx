@@ -27,42 +27,114 @@ const PortalSurvey = () => {
   const [officeCoords, setOfficeCoords] = useState<Coords | null>(null);
 
   const editMode = !!profile?.survey_completed;
+  const draftKey = user ? `survey-draft-${user.id}` : "";
 
-  // Prefill from existing profile data
+  // Hydrate ONCE: from localStorage draft first, then merge profile values for blank fields.
+  // Subsequent profile refreshes must not overwrite live form state.
+  const [hydrated, setHydrated] = useState(false);
   useEffect(() => {
-    if (!profile) return;
+    if (hydrated || !profile || !user) return;
     const p = profile as Record<string, unknown>;
     const get = (k: string) => (p[k] == null ? "" : String(p[k]));
-    setA({
+    const fromProfile: Record<string, string> = {
       country: get("country") || "NG",
-      q1: get("gender"),
-      q2: get("marital_status"),
-      q3: get("age_range"),
-      q4: get("state_of_residence"),
-      q5: get("address_of_residence"),
-      q6: get("occupation"),
-      q7: get("office_address"),
-      q8: get("accommodation_type"),
-      bedrooms: get("bedrooms"),
-      bathrooms: get("bathrooms"),
-      toilets: get("toilets"),
+      q1: get("gender"), q2: get("marital_status"), q3: get("age_range"),
+      q4: get("state_of_residence"), q5: get("address_of_residence"),
+      q6: get("occupation"), q7: get("office_address"), q8: get("accommodation_type"),
+      bedrooms: get("bedrooms"), bathrooms: get("bathrooms"), toilets: get("toilets"),
       q9: p.is_current_tenant === true ? "yes" : p.is_current_tenant === false ? "no" : "",
-      q10: get("tenancy_property_type"),
-      q11: get("annual_rent_range"),
-      q12: get("tenancy_period"),
-      q13: get("tenancy_duration"),
-      q14: get("pays_rent_to"),
-      q15: get("rent_payment_ease"),
-      q16: get("pays_on_time"),
-      q17: get("rent_payment_method"),
+      q10: get("tenancy_property_type"), q11: get("annual_rent_range"),
+      q12: get("tenancy_period"), q13: get("tenancy_duration"), q14: get("pays_rent_to"),
+      q15: get("rent_payment_ease"), q16: get("pays_on_time"), q17: get("rent_payment_method"),
       q18: p.sought_rent_help_before === true ? "yes" : p.sought_rent_help_before === false ? "no" : "",
-      q19: get("interested_in_platform"),
-      q20: get("acquisition_source"),
+      q19: get("interested_in_platform"), q20: get("acquisition_source"),
       q21: p.marketing_consent === true ? "yes" : p.marketing_consent === false ? "no" : "",
-    });
-    if (p.address_lat && p.address_lon) setResidenceCoords({ lat: Number(p.address_lat), lon: Number(p.address_lon) });
-    if (p.office_lat && p.office_lon) setOfficeCoords({ lat: Number(p.office_lat), lon: Number(p.office_lon) });
-  }, [profile]);
+    };
+    let draft: { a?: Record<string, string>; group?: number; residenceCoords?: Coords; officeCoords?: Coords } = {};
+    try {
+      const raw = localStorage.getItem(`survey-draft-${user.id}`);
+      if (raw) draft = JSON.parse(raw);
+    } catch { /* ignore */ }
+
+    setA({ ...fromProfile, ...(draft.a || {}) });
+    if (draft.residenceCoords) setResidenceCoords(draft.residenceCoords);
+    else if (p.address_lat && p.address_lon) setResidenceCoords({ lat: Number(p.address_lat), lon: Number(p.address_lon) });
+    if (draft.officeCoords) setOfficeCoords(draft.officeCoords);
+    else if (p.office_lat && p.office_lon) setOfficeCoords({ lat: Number(p.office_lat), lon: Number(p.office_lon) });
+
+    if (draft.group && draft.group >= 1 && draft.group <= 5 && !p.survey_completed) {
+      setGroup(draft.group);
+    } else if (!p.survey_completed) {
+      const has = (k: string) => p[k] != null && p[k] !== "";
+      const g1Done = has("gender") && has("marital_status") && has("age_range") && has("state_of_residence") && has("address_of_residence");
+      const g2Done = has("occupation") && has("accommodation_type");
+      const tenant = p.is_current_tenant === true;
+      const tenantAnswered = p.is_current_tenant != null;
+      const g3Done = tenantAnswered && (!tenant || (has("tenancy_property_type") && has("annual_rent_range") && has("tenancy_period") && has("tenancy_duration") && has("pays_rent_to")));
+      const g4Done = !tenant || (has("rent_payment_ease") && has("pays_on_time") && has("rent_payment_method") && p.sought_rent_help_before != null);
+      let start = 1;
+      if (g1Done) start = 2;
+      if (g1Done && g2Done) start = 3;
+      if (g1Done && g2Done && g3Done) start = tenant ? 4 : 5;
+      if (g1Done && g2Done && g3Done && g4Done) start = 5;
+      setGroup(start);
+    }
+    setHydrated(true);
+  }, [profile, user, hydrated]);
+
+  // Persist draft on every change after hydration
+  useEffect(() => {
+    if (!hydrated || !draftKey) return;
+    try {
+      localStorage.setItem(draftKey, JSON.stringify({ a, group, residenceCoords, officeCoords }));
+    } catch { /* ignore */ }
+  }, [a, group, residenceCoords, officeCoords, hydrated, draftKey]);
+
+  const buildPartialPayload = () => {
+    const payload: Record<string, unknown> = {};
+    if (a.country) payload.country = a.country;
+    if (a.q1) payload.gender = a.q1;
+    if (a.q2) payload.marital_status = a.q2;
+    if (a.q3) payload.age_range = a.q3;
+    if (a.q4) payload.state_of_residence = a.q4;
+    if (a.q5) payload.address_of_residence = a.q5;
+    if (residenceCoords) { payload.address_lat = residenceCoords.lat; payload.address_lon = residenceCoords.lon; }
+    if (a.q6) payload.occupation = a.q6;
+    if (a.q7) payload.office_address = a.q7;
+    if (officeCoords) { payload.office_lat = officeCoords.lat; payload.office_lon = officeCoords.lon; }
+    if (a.q8) payload.accommodation_type = a.q8;
+    if (a.bedrooms) payload.bedrooms = parseInt(a.bedrooms);
+    if (a.bathrooms) payload.bathrooms = parseInt(a.bathrooms);
+    if (a.toilets) payload.toilets = parseInt(a.toilets);
+    if (a.q9) payload.is_current_tenant = a.q9 === "yes";
+    if (a.q10) payload.tenancy_property_type = a.q10;
+    if (a.q11) payload.annual_rent_range = a.q11;
+    if (a.q12) payload.tenancy_period = a.q12;
+    if (a.q13) payload.tenancy_duration = a.q13;
+    if (a.q14) payload.pays_rent_to = a.q14;
+    if (a.q15) payload.rent_payment_ease = parseInt(a.q15);
+    if (a.q16) payload.pays_on_time = a.q16;
+    if (a.q17) payload.rent_payment_method = a.q17;
+    if (a.q18) payload.sought_rent_help_before = a.q18 === "yes";
+    if (a.q19) payload.interested_in_platform = a.q19;
+    if (a.q20) payload.acquisition_source = a.q20;
+    if (a.q21) payload.marketing_consent = a.q21 === "yes";
+    return payload;
+  };
+
+  const saveProgress = async (): Promise<boolean> => {
+    if (!user) return false;
+    const payload = buildPartialPayload();
+    if (Object.keys(payload).length === 0) return true;
+    const { error } = await supabase.from("profiles").update(payload as never).eq("id", user.id);
+    if (error) {
+      console.error("Survey progress save failed", error);
+      toast.error("Could not save your progress", { description: error.message });
+      return false;
+    }
+    await refreshProfile();
+    return true;
+  };
 
   const set = (k: string, v: string) => setA((prev) => ({ ...prev, [k]: v }));
   const isTenant = a.q9 === "yes";
