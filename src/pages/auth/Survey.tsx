@@ -155,18 +155,34 @@ const Survey = () => {
     return payload;
   };
 
-  const saveProgress = async () => {
-    if (!user) return;
+  const saveProgress = async (): Promise<boolean> => {
+    if (!user) return false;
     const payload = buildPartialPayload();
-    if (Object.keys(payload).length === 0) return;
+    if (Object.keys(payload).length === 0) return true;
     const { error } = await supabase.from("profiles").update(payload as never).eq("id", user.id);
-    if (error) { console.error("Survey progress save failed", error); return; }
+    if (error) {
+      console.error("Survey progress save failed", error);
+      toast.error("Could not save your progress", { description: error.message });
+      return false;
+    }
     await refreshProfile();
+    return true;
   };
 
   const handleSkip = async () => {
-    await saveProgress();
+    await saveProgress(); // even if it fails, draft is in localStorage
     navigate(dashboardPathForRole(roles[0]));
+  };
+
+  const next = async () => {
+    if (!validateGroup(group)) {
+      toast.error("Please answer all questions in this group");
+      return;
+    }
+    await saveProgress();
+    let n = group + 1;
+    if (n === 4 && !isTenant) n = 5;
+    setGroup(Math.min(n, 5));
   };
 
   const next = async () => {
