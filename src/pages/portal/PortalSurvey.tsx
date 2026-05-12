@@ -158,7 +158,10 @@ const PortalSurvey = () => {
     return null;
   }
 
-  const exit = () => navigate(dashboardPathForRole(roles[0]));
+  const exit = async () => {
+    await saveProgress();
+    navigate(dashboardPathForRole(roles[0]));
+  };
 
   const validateGroup = (g: number): boolean => {
     if (g === 1) return !!(a.country && a.q1 && a.q2 && a.q3 && a.q4 && a.q5);
@@ -178,11 +181,12 @@ const PortalSurvey = () => {
     return true;
   };
 
-  const next = () => {
+  const next = async () => {
     if (!validateGroup(group)) {
       toast.error("Please answer all questions in this group");
       return;
     }
+    await saveProgress();
     let n = group + 1;
     if (n === 4 && !isTenant) n = 5;
     setGroup(Math.min(n, 5));
