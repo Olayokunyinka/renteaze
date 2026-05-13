@@ -80,6 +80,41 @@ export type Database = {
           },
         ]
       }
+      loan_application_staff_notes: {
+        Row: {
+          author_id: string | null
+          created_at: string
+          id: string
+          loan_application_id: string
+          notes: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id?: string | null
+          created_at?: string
+          id?: string
+          loan_application_id: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string | null
+          created_at?: string
+          id?: string
+          loan_application_id?: string
+          notes?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_application_staff_notes_loan_application_id_fkey"
+            columns: ["loan_application_id"]
+            isOneToOne: false
+            referencedRelation: "loan_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       loan_applications: {
         Row: {
           annual_rent: number | null
@@ -102,7 +137,6 @@ export type Database = {
           rejection_reason: string | null
           repayment_months: number | null
           reviewed_by: string | null
-          staff_notes: string | null
           status: Database["public"]["Enums"]["loan_status"]
           updated_at: string
           user_id: string
@@ -128,7 +162,6 @@ export type Database = {
           rejection_reason?: string | null
           repayment_months?: number | null
           reviewed_by?: string | null
-          staff_notes?: string | null
           status?: Database["public"]["Enums"]["loan_status"]
           updated_at?: string
           user_id: string
@@ -154,7 +187,6 @@ export type Database = {
           rejection_reason?: string | null
           repayment_months?: number | null
           reviewed_by?: string | null
-          staff_notes?: string | null
           status?: Database["public"]["Enums"]["loan_status"]
           updated_at?: string
           user_id?: string
@@ -239,6 +271,27 @@ export type Database = {
         }
         Relationships: []
       }
+      profile_crm_tags: {
+        Row: {
+          created_at: string
+          tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          tags?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           accommodation_type: string | null
@@ -258,7 +311,6 @@ export type Database = {
           bvn: string | null
           country: string | null
           created_at: string
-          crm_tags: string[]
           dob: string | null
           email: string | null
           first_name: string | null
@@ -319,7 +371,6 @@ export type Database = {
           bvn?: string | null
           country?: string | null
           created_at?: string
-          crm_tags?: string[]
           dob?: string | null
           email?: string | null
           first_name?: string | null
@@ -380,7 +431,6 @@ export type Database = {
           bvn?: string | null
           country?: string | null
           created_at?: string
-          crm_tags?: string[]
           dob?: string | null
           email?: string | null
           first_name?: string | null
@@ -595,6 +645,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_my_crm_tags: { Args: { _tags: string[] }; Returns: undefined }
     }
     Enums: {
       account_status: "active" | "suspended" | "pending_approval"
