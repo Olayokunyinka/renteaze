@@ -243,7 +243,6 @@ const PortalSurvey = () => {
         sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
         interested_in_platform: a.q19, acquisition_source: a.q20,
         marketing_consent: a.q21 === "yes",
-        crm_tags: tags,
       }).eq("id", user.id);
 
       if (error) throw error;
@@ -281,10 +280,10 @@ const PortalSurvey = () => {
           sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
           interested_in_platform: a.q19, acquisition_source: a.q20,
           marketing_consent: a.q21 === "yes",
-          crm_tags: tags,
         });
         if (insertError) throw insertError;
       }
+      await (supabase as any).rpc("set_my_crm_tags", { _tags: tags });
       
       await refreshProfile();
       try { if (draftKey) localStorage.removeItem(draftKey); } catch { /* ignore */ }
