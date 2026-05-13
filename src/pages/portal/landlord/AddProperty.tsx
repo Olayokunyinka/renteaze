@@ -152,7 +152,7 @@ const LandlordAddProperty = () => {
         longitude: addressCoords?.lon,
       };
 
-      const { data: property, error } = await supabase
+      const { data: property, error } = await (supabase as any)
         .from("properties")
         .insert(propertyData)
         .select()
@@ -280,8 +280,10 @@ const LandlordAddProperty = () => {
                       <FormControl>
                         <AddressAutocomplete
                           value={field.value || ""}
-                          onChange={field.onChange}
-                          onCoordsChange={setAddressCoords}
+                          onChange={(v, coords) => {
+                            field.onChange(v);
+                            if (coords) setAddressCoords(coords);
+                          }}
                           placeholder="Enter full address"
                         />
                       </FormControl>
