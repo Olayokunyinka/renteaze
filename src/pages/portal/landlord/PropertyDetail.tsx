@@ -94,7 +94,8 @@ const LandlordPropertyDetail = () => {
   const fetchPropertyData = async () => {
     try {
       // Fetch property details
-      const { data: propertyData, error: propertyError } = await supabase
+      const sb = supabase as any;
+      const { data: propertyData, error: propertyError } = await sb
         .from("properties")
         .select("*")
         .eq("id", id)
@@ -102,10 +103,10 @@ const LandlordPropertyDetail = () => {
         .single();
 
       if (propertyError) throw propertyError;
-      setProperty(propertyData);
+      setProperty(propertyData as Property);
 
       // Fetch tenancy records
-      const { data: tenancyData, error: tenancyError } = await supabase
+      const { data: tenancyData, error: tenancyError } = await sb
         .from("tenancy_records")
         .select(`
           *,
@@ -118,11 +119,11 @@ const LandlordPropertyDetail = () => {
       if (tenancyError) {
         console.error("Error fetching tenancy records:", tenancyError);
       } else {
-        setTenants(tenancyData || []);
+        setTenants((tenancyData as TenancyRecord[]) || []);
       }
 
       // Fetch maintenance requests
-      const { data: maintenanceData, error: maintenanceError } = await supabase
+      const { data: maintenanceData, error: maintenanceError } = await sb
         .from("maintenance_requests")
         .select("*")
         .eq("property_id", id)
@@ -132,11 +133,11 @@ const LandlordPropertyDetail = () => {
       if (maintenanceError) {
         console.error("Error fetching maintenance requests:", maintenanceError);
       } else {
-        setMaintenance(maintenanceData || []);
+        setMaintenance((maintenanceData as MaintenanceRequest[]) || []);
       }
 
       // Fetch transactions
-      const { data: transactionData, error: transactionError } = await supabase
+      const { data: transactionData, error: transactionError } = await sb
         .from("transactions")
         .select("*")
         .eq("tenancy_id", tenancyData?.[0]?.id || "")
@@ -145,7 +146,7 @@ const LandlordPropertyDetail = () => {
       if (transactionError) {
         console.error("Error fetching transactions:", transactionError);
       } else {
-        setTransactions(transactionData || []);
+        setTransactions((transactionData as Transaction[]) || []);
       }
     } catch (error) {
       console.error("Error fetching property data:", error);

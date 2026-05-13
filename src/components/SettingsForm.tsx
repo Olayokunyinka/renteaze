@@ -107,7 +107,7 @@ const SettingsForm = () => {
     const loadPreferences = async () => {
       if (!user) return;
       try {
-        const { data, error } = await supabase
+        const { data, error } = await (supabase as any)
           .from("user_preferences")
           .select("*")
           .eq("user_id", user.id)
@@ -157,7 +157,7 @@ const SettingsForm = () => {
 
     setSubmittingPrefs(true);
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from("user_preferences")
         .update(values)
         .eq("user_id", user.id);

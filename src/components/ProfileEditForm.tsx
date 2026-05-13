@@ -41,18 +41,18 @@ const ProfileEditForm = () => {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     values: {
-      first_name: profile?.first_name || "",
-      last_name: profile?.last_name || "",
-      email: profile?.email || "",
-      phone: profile?.phone || "",
-      avatar_url: profile?.avatar_url || "",
-      bio: profile?.bio || "",
+      first_name: (profile?.first_name as string) || "",
+      last_name: (profile?.last_name as string) || "",
+      email: (profile?.email as string) || "",
+      phone: (profile?.phone as string) || "",
+      avatar_url: (profile?.avatar_url as string) || "",
+      bio: ((profile as any)?.bio as string) || "",
     },
   });
 
   useEffect(() => {
     if (profile?.avatar_url) {
-      setAvatarPreview(profile.avatar_url);
+      setAvatarPreview(profile.avatar_url as string);
     }
   }, [profile?.avatar_url]);
 
@@ -101,7 +101,7 @@ const ProfileEditForm = () => {
           last_name: values.last_name || null,
           phone: values.phone || null,
           avatar_url: avatar_url || null,
-          bio: values.bio || null,
+          ...({ bio: values.bio || null } as any),
         })
         .eq("id", profile.id);
 
