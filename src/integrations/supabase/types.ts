@@ -335,6 +335,7 @@ export type Database = {
           pays_rent_to: string | null
           phone: string | null
           phone_verified: boolean
+          preferred_contact_method: string | null
           profession_type: string | null
           professional_association: string | null
           referral_code: string | null
@@ -395,6 +396,7 @@ export type Database = {
           pays_rent_to?: string | null
           phone?: string | null
           phone_verified?: boolean
+          preferred_contact_method?: string | null
           profession_type?: string | null
           professional_association?: string | null
           referral_code?: string | null
@@ -455,6 +457,7 @@ export type Database = {
           pays_rent_to?: string | null
           phone?: string | null
           phone_verified?: boolean
+          preferred_contact_method?: string | null
           profession_type?: string | null
           professional_association?: string | null
           referral_code?: string | null

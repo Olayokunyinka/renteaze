@@ -49,6 +49,7 @@ const PortalSurvey = () => {
       q18: p.sought_rent_help_before === true ? "yes" : p.sought_rent_help_before === false ? "no" : "",
       q19: get("interested_in_platform"), q20: get("acquisition_source"),
       q21: p.marketing_consent === true ? "yes" : p.marketing_consent === false ? "no" : "",
+      q22: get("preferred_contact_method"),
     };
     let draft: { a?: Record<string, string>; group?: number; residenceCoords?: Coords; officeCoords?: Coords } = {};
     try {
@@ -78,6 +79,8 @@ const PortalSurvey = () => {
       if (g1Done && g2Done && g3Done) start = tenant ? 4 : 5;
       if (g1Done && g2Done && g3Done && g4Done) start = 5;
       setGroup(start);
+    } else if (p.survey_completed && (p.preferred_contact_method == null || p.preferred_contact_method === "")) {
+      setGroup(5);
     }
     setHydrated(true);
   }, [profile, user, hydrated]);
@@ -119,6 +122,7 @@ const PortalSurvey = () => {
     if (a.q19) payload.interested_in_platform = a.q19;
     if (a.q20) payload.acquisition_source = a.q20;
     if (a.q21) payload.marketing_consent = a.q21 === "yes";
+    if (a.q22) payload.preferred_contact_method = a.q22;
     return payload;
   };
 
@@ -177,7 +181,7 @@ const PortalSurvey = () => {
       return true;
     }
     if (g === 4) return !isTenant ? true : !!(a.q15 && a.q16 && a.q17 && a.q18);
-    if (g === 5) return !!(a.q19 && a.q20 && a.q21);
+    if (g === 5) return !!(a.q19 && a.q20 && a.q21 && a.q22);
     return true;
   };
 
@@ -243,6 +247,7 @@ const PortalSurvey = () => {
         sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
         interested_in_platform: a.q19, acquisition_source: a.q20,
         marketing_consent: a.q21 === "yes",
+        preferred_contact_method: a.q22 || null,
       }).eq("id", user.id);
 
       if (error) throw error;
@@ -280,6 +285,7 @@ const PortalSurvey = () => {
           sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
           interested_in_platform: a.q19, acquisition_source: a.q20,
           marketing_consent: a.q21 === "yes",
+          preferred_contact_method: a.q22 || null,
         });
         if (insertError) throw insertError;
       }
@@ -612,6 +618,15 @@ const PortalSurvey = () => {
                 {SEL("q21", [
                   { v: "yes", l: "Yes" },
                   { v: "no", l: "No" },
+                ])}
+              </div>
+
+              <div>
+                <Label>How would you like to be contacted?</Label>
+                {SEL("q22", [
+                  { v: "email", l: "Email" },
+                  { v: "whatsapp", l: "WhatsApp" },
+                  { v: "call", l: "Call" },
                 ])}
               </div>
             </div>
