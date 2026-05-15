@@ -167,10 +167,10 @@ const PortalSurvey = () => {
         sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
         interested_in_platform: a.q19, acquisition_source: a.q20,
         marketing_consent: a.q21 === "yes",
-        crm_tags: tags,
       }).eq("id", user.id);
 
       if (error) throw error;
+      await supabase.rpc("set_my_crm_tags", { _tags: tags });
       
       // Verify the update actually affected rows
       const { count } = await supabase
@@ -205,9 +205,9 @@ const PortalSurvey = () => {
           sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
           interested_in_platform: a.q19, acquisition_source: a.q20,
           marketing_consent: a.q21 === "yes",
-          crm_tags: tags,
         });
         if (insertError) throw insertError;
+        await supabase.rpc("set_my_crm_tags", { _tags: tags });
       }
       
       await refreshProfile();
@@ -321,8 +321,7 @@ const PortalSurvey = () => {
                 <Label>Address of Residence</Label>
                 <AddressAutocomplete
                   value={a.q5 || ""}
-                  onChange={(v) => set("q5", v)}
-                  onCoordsChange={setResidenceCoords}
+                  onChange={(v, coords) => { set("q5", v); if (coords) setResidenceCoords(coords); }}
                   placeholder="Enter your full address"
                 />
               </div>
@@ -348,8 +347,7 @@ const PortalSurvey = () => {
                   <Label>Office Address</Label>
                   <AddressAutocomplete
                     value={a.q7 || ""}
-                    onChange={(v) => set("q7", v)}
-                    onCoordsChange={setOfficeCoords}
+                    onChange={(v, coords) => { set("q7", v); if (coords) setOfficeCoords(coords); }}
                     placeholder="Enter your office address"
                   />
                 </div>

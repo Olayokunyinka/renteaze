@@ -14,6 +14,9 @@ const Contact = () => (
         <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
           Have questions? Ready to get started? Our team is here to help.
         </p>
+        <p className="mt-3 text-xs text-muted-foreground/80">
+          Renteaze is operated by Renteaze International Limited (RC 1768094).
+        </p>
       </div>
     </section>
 

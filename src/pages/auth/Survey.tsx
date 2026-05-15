@@ -223,9 +223,9 @@ const Survey = () => {
         sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
         interested_in_platform: a.q19, acquisition_source: a.q20,
         marketing_consent: a.q21 === "yes",
-        crm_tags: tags,
       }).eq("id", user.id).select("id");
       if (error) throw error;
+      await supabase.rpc("set_my_crm_tags", { _tags: tags });
       if (!updated || updated.length === 0) {
         throw new Error("Could not save your profile. Please sign out and sign in again, then retry.");
       }

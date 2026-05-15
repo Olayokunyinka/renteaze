@@ -27,6 +27,9 @@ const About = () => (
         <p className="mt-6 text-lg text-muted-foreground max-w-2xl mx-auto">
           Born from 15+ years of Nigerian real estate expertise, Renteaze is transforming how people rent, own, and invest in property.
         </p>
+        <p className="mt-4 text-xs text-muted-foreground/80">
+          Renteaze is operated by Renteaze International Limited (RC 1768094).
+        </p>
       </div>
     </section>
 

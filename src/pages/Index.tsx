@@ -14,6 +14,7 @@ const personas = [
   { label: "I'm a Tenant", path: "/for-tenants", icon: Home, desc: "Flexible rent solutions & savings plans" },
   { label: "I'm a Landlord", path: "/for-landlords", icon: Building2, desc: "Guaranteed income & property management" },
   { label: "I'm an Investor", path: "/for-investors", icon: TrendingUp, desc: "Premium Nigerian real estate opportunities" },
+  { label: "I'm a Professional", path: "/professionals", icon: HandshakeIcon, desc: "Refer clients & earn commissions" },
 ];
 
 const differentiators = [
@@ -41,10 +42,17 @@ const investorSteps = [
   { step: "03", title: "Invest & Earn Returns", desc: "Passive income from property investments managed by our expert team." },
 ];
 
+const professionalSteps = [
+  { step: "01", title: "Sign Up & Verify Credentials", desc: "Create your partner profile and submit credentials for verification." },
+  { step: "02", title: "Refer Clients", desc: "Send tenants, landlords, or investors our way using your unique referral code." },
+  { step: "03", title: "Earn Commissions", desc: "Get paid commissions on every closed deal — tracked transparently in your dashboard." },
+];
+
 const testimonials = [
   { name: "Adunni O.", role: "Tenant, Lekki", text: "Renteaze's Save for Rent plan changed my life. I no longer stress about annual rent payments!", rating: 5 },
   { name: "Chief Balogun", role: "Landlord, Victoria Island", text: "Guaranteed rent means I never worry about vacancies. Their property management is exceptional.", rating: 5 },
   { name: "Dr. Emeka N.", role: "Diaspora Investor, UK", text: "As a Nigerian in the UK, Renteaze gives me the confidence to invest back home with full transparency.", rating: 5 },
+  { name: "Tunde A.", role: "Partner Agent, Lagos", text: "The referral dashboard is brilliant — I see every lead, every deal, every commission in real time.", rating: 5 },
 ];
 
 const Index = () => (
@@ -66,7 +74,7 @@ const Index = () => (
         </div>
 
         {/* Persona selector */}
-        <div className="mt-10 grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl">
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 max-w-3xl">
           {personas.map((p) => (
             <Link key={p.path} to={p.path}>
               <Card className="bg-primary/10 border-primary/20 hover:bg-primary/20 hover:scale-[1.02] transition-all cursor-pointer h-full">
@@ -106,15 +114,17 @@ const Index = () => (
       <div className="container mx-auto px-4 lg:px-8">
         <SectionHeading title="How It Works" subtitle="Getting started with Renteaze is easy — no matter who you are." />
         <Tabs defaultValue="tenant" className="max-w-3xl mx-auto">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className="grid w-full grid-cols-4">
             <TabsTrigger value="tenant">Tenants</TabsTrigger>
             <TabsTrigger value="landlord">Landlords</TabsTrigger>
             <TabsTrigger value="investor">Investors</TabsTrigger>
+            <TabsTrigger value="professional">Professionals</TabsTrigger>
           </TabsList>
           {[
             { value: "tenant", steps: tenantSteps },
             { value: "landlord", steps: landlordSteps },
             { value: "investor", steps: investorSteps },
+            { value: "professional", steps: professionalSteps },
           ].map((tab) => (
             <TabsContent key={tab.value} value={tab.value} className="mt-8">
               <div className="space-y-6">
@@ -133,7 +143,7 @@ const Index = () => (
               <div className="mt-8 text-center">
                 <Link to={`/signup?role=${tab.value}`}>
                   <Button className="bg-accent text-accent-foreground hover:opacity-90 gap-2">
-                    Get Started as {tab.value === "tenant" ? "a Tenant" : tab.value === "landlord" ? "a Landlord" : "an Investor"} <ArrowRight className="h-4 w-4" />
+                    Get Started as {tab.value === "tenant" ? "a Tenant" : tab.value === "landlord" ? "a Landlord" : tab.value === "investor" ? "an Investor" : "a Professional"} <ArrowRight className="h-4 w-4" />
                   </Button>
                 </Link>
               </div>
@@ -233,7 +243,7 @@ const Index = () => (
     <section className="py-16 md:py-20">
       <div className="container mx-auto px-4 lg:px-8">
         <SectionHeading title="What Our Clients Say" subtitle="Real stories from tenants, landlords, and investors across Nigeria." />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {testimonials.map((t) => (
             <Card key={t.name} className="border-none shadow-md hover:shadow-lg transition-shadow">
               <CardContent className="p-6">
@@ -281,7 +291,7 @@ const Index = () => (
     <section className="py-16 md:py-20">
       <div className="container mx-auto px-4 lg:px-8">
         <SectionHeading title="Solutions for Everyone" subtitle="Whether you rent, own, or invest — we have a plan for you." />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {personas.map((p) => (
             <Link key={p.path} to={p.path}>
               <Card className="group hover:shadow-lg hover:-translate-y-1 transition-all duration-300 h-full border-2 hover:border-primary">

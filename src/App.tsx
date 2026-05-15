@@ -85,6 +85,12 @@ import AdminSettings from "./pages/portal/admin/Settings";
 import AdminProfile from "./pages/portal/admin/Profile";
 import PortalSurvey from "./pages/portal/PortalSurvey";
 
+import Terms from "./pages/legal/Terms";
+import Privacy from "./pages/legal/Privacy";
+import CookiesPage from "./pages/legal/Cookies";
+import AmlKyc from "./pages/legal/AmlKyc";
+import Disclaimer from "./pages/legal/Disclaimer";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -183,6 +189,13 @@ const App = () => (
           <Route path="/lp/landlord-management" element={<LandlordManagementLP />} />
           <Route path="/lp/diaspora-investor" element={<DiasporaInvestorLP />} />
           <Route path="/lp/partner" element={<PartnerLP />} />
+
+          {/* Legal */}
+          <Route path="/legal/terms" element={<Terms />} />
+          <Route path="/legal/privacy" element={<Privacy />} />
+          <Route path="/legal/cookies" element={<CookiesPage />} />
+          <Route path="/legal/aml-kyc" element={<AmlKyc />} />
+          <Route path="/legal/disclaimer" element={<Disclaimer />} />
 
           <Route path="*" element={<NotFound />} />
         </Routes>
