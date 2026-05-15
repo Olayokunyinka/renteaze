@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Save, Mail, Phone, User } from "lucide-react";
+import { Loader2, Save, Mail, Phone, User, MessageCircle } from "lucide-react";
 import { toast } from "sonner";
 import {
   Form,
@@ -18,6 +18,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -28,6 +29,7 @@ const profileSchema = z.object({
   phone: z.string().optional().or(z.literal("")),
   avatar_url: z.string().optional().or(z.literal("")),
   bio: z.string().optional().or(z.literal("")),
+  preferred_contact_method: z.enum(["email", "whatsapp", "call"]).optional().or(z.literal("")),
 });
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
@@ -41,18 +43,19 @@ const ProfileEditForm = () => {
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileSchema),
     values: {
-      first_name: profile?.first_name || "",
-      last_name: profile?.last_name || "",
-      email: profile?.email || "",
-      phone: profile?.phone || "",
-      avatar_url: profile?.avatar_url || "",
-      bio: profile?.bio || "",
+      first_name: (profile?.first_name as string) || "",
+      last_name: (profile?.last_name as string) || "",
+      email: (profile?.email as string) || "",
+      phone: (profile?.phone as string) || "",
+      avatar_url: (profile?.avatar_url as string) || "",
+      bio: ((profile as any)?.bio as string) || "",
+      preferred_contact_method: (((profile as any)?.preferred_contact_method as "email" | "whatsapp" | "call" | null) || "") as "" | "email" | "whatsapp" | "call",
     },
   });
 
   useEffect(() => {
     if (profile?.avatar_url) {
-      setAvatarPreview(profile.avatar_url);
+      setAvatarPreview(profile.avatar_url as string);
     }
   }, [profile?.avatar_url]);
 
@@ -101,7 +104,8 @@ const ProfileEditForm = () => {
           last_name: values.last_name || null,
           phone: values.phone || null,
           avatar_url: avatar_url || null,
-          bio: values.bio || null,
+          ...({ bio: values.bio || null } as any),
+          ...({ preferred_contact_method: values.preferred_contact_method || null } as any),
         })
         .eq("id", profile.id);
 
@@ -210,6 +214,32 @@ const ProfileEditForm = () => {
                   <FormControl>
                     <Input placeholder="+234 701 000 0000" {...field} />
                   </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="preferred_contact_method"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="flex items-center gap-2">
+                    <MessageCircle className="h-4 w-4" /> Preferred contact method
+                  </FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value || ""}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select how you'd like to be contacted" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="email">Email</SelectItem>
+                      <SelectItem value="whatsapp">WhatsApp</SelectItem>
+                      <SelectItem value="call">Call</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>How we should reach out about updates and offers.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}

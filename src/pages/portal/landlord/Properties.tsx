@@ -41,7 +41,7 @@ const LandlordProperties = () => {
 
   const fetchProperties = async () => {
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from("properties")
         .select(`
           *,
@@ -51,7 +51,7 @@ const LandlordProperties = () => {
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setProperties(data || []);
+      setProperties((data as Property[]) || []);
     } catch (error) {
       console.error("Error fetching properties:", error);
     } finally {

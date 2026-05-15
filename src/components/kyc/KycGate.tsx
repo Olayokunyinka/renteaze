@@ -33,7 +33,13 @@ const KycGate = ({ onComplete, onSkip }: KycGateProps) => {
     setSubmitting(true);
     try {
       const { data, error } = await supabase.functions.invoke("verify-nin", {
-        body: { nin: form.nin },
+        body: {
+          nin: form.nin,
+          bvn: form.bvn,
+          account: form.account,
+          bank: form.bank,
+          dob: form.dob,
+        },
       });
       if (error || !data?.verified) {
         toast.error(data?.error || "NIN verification failed", {
@@ -41,20 +47,6 @@ const KycGate = ({ onComplete, onSkip }: KycGateProps) => {
         });
         return;
       }
-      const { error: upErr } = await supabase
-        .from("profiles")
-        .update({
-          nin: form.nin,
-          bvn: form.bvn,
-          bank_account_number: form.account,
-          bank_name: form.bank,
-          dob: form.dob,
-          nin_verified: true,
-          kyc_completed: true,
-          kyc_status: "verified",
-        })
-        .eq("id", user.id);
-      if (upErr) throw upErr;
       toast.success("Identity verified");
       await refreshProfile();
       onComplete?.();
