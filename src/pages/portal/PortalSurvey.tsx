@@ -10,12 +10,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth, dashboardPathForRole } from "@/hooks/useAuth";
 import { COUNTRIES, NIGERIAN_STATES } from "@/data/nigeria";
+import { OtherInput } from "@/components/survey/OtherInput";
+import { TenancyDatePicker } from "@/components/survey/TenancyDatePicker";
+import { ContactWindowsPicker } from "@/components/survey/ContactWindowsPicker";
 
 const NON_WORKING = ["student", "retired", "unemployed"];
 const RESIDENTIAL_TYPES = ["tenement", "flat", "bungalow", "duplex"];
 
 type Coords = { lat: number; lon: number };
 type Opt = { v: string; l: string };
+type ContactWindow = { day: string; time_of_day: "morning" | "afternoon" | "evening" };
 
 const PortalSurvey = () => {
   const { user, profile, roles, refreshProfile, loading } = useAuth();
@@ -25,6 +29,9 @@ const PortalSurvey = () => {
   const [a, setA] = useState<Record<string, string>>({ country: "NG" });
   const [residenceCoords, setResidenceCoords] = useState<Coords | null>(null);
   const [officeCoords, setOfficeCoords] = useState<Coords | null>(null);
+  const [tenancyStartDate, setTenancyStartDate] = useState<Date | null>(null);
+  const [tenancyEndDate, setTenancyEndDate] = useState<Date | null>(null);
+  const [contactWindows, setContactWindows] = useState<ContactWindow[]>([]);
 
   const editMode = !!profile?.survey_completed;
 
@@ -37,31 +44,47 @@ const PortalSurvey = () => {
       country: get("country") || "NG",
       q1: get("gender"),
       q2: get("marital_status"),
+      q2_other: get("marital_status_other"),
       q3: get("age_range"),
       q4: get("state_of_residence"),
       q5: get("address_of_residence"),
       q6: get("occupation"),
       q7: get("office_address"),
       q8: get("accommodation_type"),
+      q8_other: get("accommodation_type_other"),
       bedrooms: get("bedrooms"),
       bathrooms: get("bathrooms"),
       toilets: get("toilets"),
       q9: p.is_current_tenant === true ? "yes" : p.is_current_tenant === false ? "no" : "",
       q10: get("tenancy_property_type"),
-      q11: get("annual_rent_range"),
-      q12: get("tenancy_period"),
+      q10_other: get("tenancy_property_type_other"),
+      q11: get("annual_rent_amount"),
       q13: get("tenancy_duration"),
       q14: get("pays_rent_to"),
+      q14_other: get("pays_rent_to_other"),
       q15: get("rent_payment_ease"),
       q16: get("pays_on_time"),
       q17: get("rent_payment_method"),
+      q17_other: get("rent_payment_method_other"),
       q18: p.sought_rent_help_before === true ? "yes" : p.sought_rent_help_before === false ? "no" : "",
       q19: get("interested_in_platform"),
       q20: get("acquisition_source"),
-      q21: p.marketing_consent === true ? "yes" : p.marketing_consent === false ? "no" : "",
+      q20_other: get("acquisition_source_other"),
+      q21: get("preferred_contact_method"),
+      q22: p.marketing_consent === true ? "yes" : p.marketing_consent === false ? "no" : "",
     });
     if (p.address_lat && p.address_lon) setResidenceCoords({ lat: Number(p.address_lat), lon: Number(p.address_lon) });
     if (p.office_lat && p.office_lon) setOfficeCoords({ lat: Number(p.office_lat), lon: Number(p.office_lon) });
+    if (p.tenancy_start_date) setTenancyStartDate(new Date(String(p.tenancy_start_date)));
+    if (p.tenancy_end_date) setTenancyEndDate(new Date(String(p.tenancy_end_date)));
+    if (p.preferred_contact_windows) {
+      try {
+        const windows = JSON.parse(String(p.preferred_contact_windows));
+        setContactWindows(Array.isArray(windows) ? windows : []);
+      } catch {
+        setContactWindows([]);
+      }
+    }
   }, [profile]);
 
   const set = (k: string, v: string) => setA((prev) => ({ ...prev, [k]: v }));
@@ -89,20 +112,40 @@ const PortalSurvey = () => {
   const exit = () => navigate(dashboardPathForRole(roles[0]));
 
   const validateGroup = (g: number): boolean => {
-    if (g === 1) return !!(a.country && a.q1 && a.q2 && a.q3 && a.q4 && a.q5);
+    if (g === 1) {
+      if (!a.country || !a.q1 || !a.q3 || !a.q4 || !a.q5) return false;
+      if (a.q2 === "other" && !a.q2_other) return false;
+      return !!a.q2;
+    }
     if (g === 2) {
       if (!a.q6 || !a.q8) return false;
+      if (a.q8 === "other" && !a.q8_other) return false;
       if (showOffice && !a.q7) return false;
       if (isResidential && !(a.bedrooms && a.bathrooms && a.toilets)) return false;
       return true;
     }
     if (g === 3) {
       if (!a.q9) return false;
-      if (a.q9 === "yes") return !!(a.q10 && a.q11 && a.q12 && a.q13 && a.q14);
+      if (a.q9 === "yes") {
+        if (!a.q10 || !a.q11 || !a.q13 || !a.q14) return false;
+        if (a.q10 === "other" && !a.q10_other) return false;
+        if (a.q14 === "other" && !a.q14_other) return false;
+        if (!tenancyStartDate) return false;
+      }
       return true;
     }
-    if (g === 4) return !isTenant ? true : !!(a.q15 && a.q16 && a.q17 && a.q18);
-    if (g === 5) return !!(a.q19 && a.q20 && a.q21);
+    if (g === 4) {
+      if (!isTenant) return true;
+      if (!a.q15 || !a.q16 || !a.q17 || a.q18 === "") return false;
+      if (a.q17 === "other" && !a.q17_other) return false;
+      return true;
+    }
+    if (g === 5) {
+      if (!a.q19 || !a.q20 || !a.q21 || a.q22 === "") return false;
+      if (a.q20 === "other" && !a.q20_other) return false;
+      if (a.q21 === "call" && contactWindows.length === 0) return false;
+      return true;
+    }
     return true;
   };
 
@@ -130,13 +173,11 @@ const PortalSurvey = () => {
     setSubmitting(true);
     try {
       const tags: string[] = [];
-      const rentRanges: Record<string, number> = {
-        "lt100k": 50000, "100-500k": 500000, "501k-1m": 1000000, "1-3m": 3000000, "3-10m": 10000000, "gt10m": 20000000,
-      };
-      const rentValue = a.q11 ? rentRanges[a.q11] || 0 : 0;
+      const rentAmount = a.q11 ? parseFloat(a.q11) : 0;
       const ease = parseInt(a.q15 || "0");
 
-      if (rentValue >= 501000 && ease >= 4) tags.push("HIGH_PRIORITY_LOAN_PROSPECT");
+      // Updated lead scoring using numeric rent amount
+      if (rentAmount >= 1000000 && ease >= 4) tags.push("HIGH_PRIORITY_LOAN_PROSPECT");
       if (a.q17 === "save_up") tags.push("SAVE_FOR_RENT_PROSPECT");
       if (a.q17 === "loan") tags.push("EXISTING_LOAN_BEHAVIOUR");
       if (a.q18 === "yes") tags.push("STRUGGLED_TO_PAY");
@@ -147,68 +188,47 @@ const PortalSurvey = () => {
         survey_completed: true,
         survey_completed_at: new Date().toISOString(),
         country: a.country,
-        gender: a.q1, marital_status: a.q2, age_range: a.q3,
-        state_of_residence: a.q4, address_of_residence: a.q5,
+        gender: a.q1,
+        marital_status: a.q2,
+        marital_status_other: a.q2 === "other" ? a.q2_other || null : null,
+        age_range: a.q3,
+        state_of_residence: a.q4,
+        address_of_residence: a.q5,
         address_lat: residenceCoords?.lat ?? null,
         address_lon: residenceCoords?.lon ?? null,
-        occupation: a.q6, office_address: a.q7 || null,
+        occupation: a.q6,
+        office_address: a.q7 || null,
         office_lat: officeCoords?.lat ?? null,
         office_lon: officeCoords?.lon ?? null,
         accommodation_type: a.q8,
+        accommodation_type_other: a.q8 === "other" ? a.q8_other || null : null,
         bedrooms: isResidential && a.bedrooms ? parseInt(a.bedrooms) : null,
         bathrooms: isResidential && a.bathrooms ? parseInt(a.bathrooms) : null,
         toilets: isResidential && a.toilets ? parseInt(a.toilets) : null,
         is_current_tenant: a.q9 === "yes",
-        tenancy_property_type: a.q10 || null, annual_rent_range: a.q11 || null,
-        tenancy_period: a.q12 || null, tenancy_duration: a.q13 || null,
+        tenancy_property_type: a.q10 || null,
+        tenancy_property_type_other: a.q10 === "other" ? a.q10_other || null : null,
+        annual_rent_amount: a.q11 ? parseFloat(a.q11) : null,
+        tenancy_duration: a.q13 || null,
+        tenancy_start_date: tenancyStartDate ? tenancyStartDate.toISOString().split("T")[0] : null,
+        tenancy_end_date: tenancyEndDate ? tenancyEndDate.toISOString().split("T")[0] : null,
         pays_rent_to: a.q14 || null,
+        pays_rent_to_other: a.q14 === "other" ? a.q14_other || null : null,
         rent_payment_ease: a.q15 ? parseInt(a.q15) : null,
-        pays_on_time: a.q16 || null, rent_payment_method: a.q17 || null,
+        pays_on_time: a.q16 || null,
+        rent_payment_method: a.q17 || null,
+        rent_payment_method_other: a.q17 === "other" ? a.q17_other || null : null,
         sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
-        interested_in_platform: a.q19, acquisition_source: a.q20,
-        marketing_consent: a.q21 === "yes",
+        interested_in_platform: a.q19,
+        acquisition_source: a.q20 || null,
+        acquisition_source_other: a.q20 === "other" ? a.q20_other || null : null,
+        preferred_contact_method: a.q21 || null,
+        preferred_contact_windows: a.q21 === "call" && contactWindows.length > 0 ? JSON.stringify(contactWindows) : null,
+        marketing_consent: a.q22 === "yes",
       }).eq("id", user.id);
 
       if (error) throw error;
       await supabase.rpc("set_my_crm_tags", { _tags: tags });
-      
-      // Verify the update actually affected rows
-      const { count } = await supabase
-        .from("profiles")
-        .select("*", { count: "exact", head: true })
-        .eq("id", user.id);
-      
-      if (count === 0) {
-        // Profile doesn't exist, create it
-        const { error: insertError } = await supabase.from("profiles").insert({
-          id: user.id,
-          survey_completed: true,
-          survey_completed_at: new Date().toISOString(),
-          country: a.country,
-          gender: a.q1, marital_status: a.q2, age_range: a.q3,
-          state_of_residence: a.q4, address_of_residence: a.q5,
-          address_lat: residenceCoords?.lat ?? null,
-          address_lon: residenceCoords?.lon ?? null,
-          occupation: a.q6, office_address: a.q7 || null,
-          office_lat: officeCoords?.lat ?? null,
-          office_lon: officeCoords?.lon ?? null,
-          accommodation_type: a.q8,
-          bedrooms: isResidential && a.bedrooms ? parseInt(a.bedrooms) : null,
-          bathrooms: isResidential && a.bathrooms ? parseInt(a.bathrooms) : null,
-          toilets: isResidential && a.toilets ? parseInt(a.toilets) : null,
-          is_current_tenant: a.q9 === "yes",
-          tenancy_property_type: a.q10 || null, annual_rent_range: a.q11 || null,
-          tenancy_period: a.q12 || null, tenancy_duration: a.q13 || null,
-          pays_rent_to: a.q14 || null,
-          rent_payment_ease: a.q15 ? parseInt(a.q15) : null,
-          pays_on_time: a.q16 || null, rent_payment_method: a.q17 || null,
-          sought_rent_help_before: a.q18 ? a.q18 === "yes" : null,
-          interested_in_platform: a.q19, acquisition_source: a.q20,
-          marketing_consent: a.q21 === "yes",
-        });
-        if (insertError) throw insertError;
-        await supabase.rpc("set_my_crm_tags", { _tags: tags });
-      }
       
       await refreshProfile();
       toast.success(editMode ? "Profile updated" : "Profile complete!", {
@@ -297,7 +317,9 @@ const PortalSurvey = () => {
                   { v: "divorced", l: "Divorced" },
                   { v: "widowed", l: "Widowed" },
                   { v: "separated", l: "Separated" },
+                  { v: "other", l: "Other" },
                 ])}
+                {a.q2 === "other" && <OtherInput name="q2" value={a.q2_other||""} onChange={(v)=>set("q2_other",v)} />}
               </div>
 
               <div>
@@ -367,6 +389,7 @@ const PortalSurvey = () => {
                   { v: "condo", l: "Condominium" },
                   { v: "other", l: "Other" },
                 ])}
+                {a.q8 === "other" && <OtherInput name="q8" value={a.q8_other||""} onChange={(v)=>set("q8_other",v)} />}
               </div>
 
               {isResidential && (
@@ -404,41 +427,33 @@ const PortalSurvey = () => {
                       { v: "apartment", l: "Apartment" },
                       { v: "other", l: "Other" },
                     ])}
+                    {a.q10 === "other" && <OtherInput name="q10" value={a.q10_other||""} onChange={(v)=>set("q10_other",v)} />}
                   </div>
 
                   <div>
-                    <Label>Annual Rent Range</Label>
-                    {SEL("q11", [
-                      { v: "lt100k", l: "Less than ₦100,000" },
-                      { v: "100-500k", l: "₦100,000 - ₦500,000" },
-                      { v: "501k-1m", l: "₦501,000 - ₦1,000,000" },
-                      { v: "1-3m", l: "₦1,000,000 - ₦3,000,000" },
-                      { v: "3-10m", l: "₦3,000,000 - ₦10,000,000" },
-                      { v: "gt10m", l: "More than ₦10,000,000" },
-                    ])}
-                  </div>
-
-                  <div>
-                    <Label>How long have you been renting this property?</Label>
-                    {SEL("q12", [
-                      { v: "lt1year", l: "Less than 1 year" },
-                      { v: "1-2years", l: "1-2 years" },
-                      { v: "3-5years", l: "3-5 years" },
-                      { v: "6-10years", l: "6-10 years" },
-                      { v: "gt10years", l: "More than 10 years" },
-                    ])}
+                    <Label>Annual Rent (NGN)</Label>
+                    <Input type="number" value={a.q11||""} onChange={(e)=>set("q11",e.target.value)} placeholder="e.g. 1500000" className="mt-1" min="1" />
+                    {a.q11 && <p className="text-xs text-muted-foreground mt-1">₦{parseInt(a.q11).toLocaleString("en-NG")}</p>}
                   </div>
 
                   <div>
                     <Label>How long is your current tenancy agreement?</Label>
                     {SEL("q13", [
                       { v: "monthly", l: "Monthly" },
-                      { v: "quarterly", l: "Quarterly" },
-                      { v: "biannually", l: "Bi-annually" },
-                      { v: "annually", l: "Annually" },
-                      { v: "other", l: "Other" },
+                      { v: "quarterly", l: "Quarterly (3 months)" },
+                      { v: "biannually", l: "Bi-annually (6 months)" },
+                      { v: "annually", l: "Annually (12 months)" },
+                      { v: "other", l: "Other duration" },
                     ])}
                   </div>
+
+                  {a.q13 && <TenancyDatePicker 
+                    startDate={tenancyStartDate} 
+                    endDate={tenancyEndDate}
+                    onStartDateChange={setTenancyStartDate}
+                    onEndDateChange={setTenancyEndDate}
+                    duration={a.q13 as any}
+                  />}
 
                   <div>
                     <Label>Who do you pay rent to?</Label>
@@ -448,6 +463,7 @@ const PortalSurvey = () => {
                       { v: "caretaker", l: "Through a caretaker" },
                       { v: "other", l: "Other" },
                     ])}
+                    {a.q14 === "other" && <OtherInput name="q14" value={a.q14_other||""} onChange={(v)=>set("q14_other",v)} />}
                   </div>
                 </>
               )}
@@ -492,6 +508,7 @@ const PortalSurvey = () => {
                   { v: "loan", l: "Take a loan" },
                   { v: "other", l: "Other" },
                 ])}
+                {a.q17 === "other" && <OtherInput name="q17" value={a.q17_other||""} onChange={(v)=>set("q17_other",v)} />}
               </div>
 
               <div>
@@ -504,10 +521,10 @@ const PortalSurvey = () => {
             </div>
           )}
 
-          {/* Group 5: Platform Interest */}
+          {/* Group 5: Platform Interest & Contact */}
           {group === 5 && (
             <div className="space-y-6">
-              <h2 className="text-xl font-semibold">Platform Interest</h2>
+              <h2 className="text-xl font-semibold">Platform Interest & Contact</h2>
 
               <div>
                 <Label>Are you interested in using Renteaze platform?</Label>
@@ -521,19 +538,32 @@ const PortalSurvey = () => {
               <div>
                 <Label>How did you hear about Renteaze?</Label>
                 {SEL("q20", [
-                  { v: "social_media", l: "Social media" },
-                  { v: "friend_family", l: "Friend/Family" },
-                  { v: "online_search", l: "Online search" },
-                  { v: "advertisement", l: "Advertisement" },
-                  { v: "event", l: "Event/Conference" },
-                  { v: "news_article", l: "News article" },
+                  { v: "social", l: "Social Media" },
+                  { v: "friend", l: "Referred by a friend" },
+                  { v: "agent", l: "Referred by an agent/professional" },
+                  { v: "search", l: "Search engine" },
+                  { v: "event", l: "Event or seminar" },
+                  { v: "ad", l: "Advertisement" },
                   { v: "other", l: "Other" },
                 ])}
+                {a.q20 === "other" && <OtherInput name="q20" value={a.q20_other||""} onChange={(v)=>set("q20_other",v)} />}
               </div>
 
               <div>
-                <Label>Would you like to receive marketing communications from Renteaze?</Label>
+                <Label>Preferred Contact Method</Label>
                 {SEL("q21", [
+                  { v: "whatsapp", l: "WhatsApp" },
+                  { v: "call", l: "Call" },
+                ])}
+              </div>
+
+              {a.q21 === "call" && (
+                <ContactWindowsPicker windows={contactWindows} onChange={setContactWindows} />
+              )}
+
+              <div>
+                <Label>Would you like to receive marketing communications from Renteaze?</Label>
+                {SEL("q22", [
                   { v: "yes", l: "Yes" },
                   { v: "no", l: "No" },
                 ])}

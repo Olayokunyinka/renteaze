@@ -111,25 +111,47 @@ const UserDetailDrawer = ({ userId, onClose }: Props) => {
 
               <TabsContent value="tenancy" className="mt-4 space-y-1">
                 <Field label="Accommodation type" value={profile.accommodation_type as string} />
+                <Field label="Accommodation type (other)" value={profile.accommodation_type_other as string} />
                 <Field label="Currently a tenant" value={fmtBool(profile.is_current_tenant)} />
                 <Field label="Property type" value={profile.tenancy_property_type as string} />
-                <Field label="Annual rent range" value={profile.annual_rent_range as string} />
-                <Field label="Tenancy period" value={profile.tenancy_period as string} />
+                <Field label="Property type (other)" value={profile.tenancy_property_type_other as string} />
+                <Field label="Annual rent amount" value={profile.annual_rent_amount ? `₦${(profile.annual_rent_amount as number).toLocaleString("en-NG")}` : null} />
                 <Field label="Tenancy duration" value={profile.tenancy_duration as string} />
+                <Field label="Tenancy start date" value={profile.tenancy_start_date ? new Date(String(profile.tenancy_start_date)).toLocaleDateString() : null} />
+                <Field label="Tenancy end date" value={profile.tenancy_end_date ? new Date(String(profile.tenancy_end_date)).toLocaleDateString() : null} />
                 <Field label="Pays rent to" value={profile.pays_rent_to as string} />
+                <Field label="Pays rent to (other)" value={profile.pays_rent_to_other as string} />
                 <Field label="Rent payment ease (1–5)" value={fmtNum(profile.rent_payment_ease)} />
                 <Field label="Pays on time" value={profile.pays_on_time as string} />
                 <Field label="Payment method" value={profile.rent_payment_method as string} />
+                <Field label="Payment method (other)" value={profile.rent_payment_method_other as string} />
                 <Field label="Sought rent help before" value={fmtBool(profile.sought_rent_help_before)} />
                 <Field label="Interested in platform" value={profile.interested_in_platform as string} />
               </TabsContent>
 
               <TabsContent value="crm" className="mt-4 space-y-1">
                 <Field label="Acquisition source" value={profile.acquisition_source as string} />
+                <Field label="Acquisition source (other)" value={profile.acquisition_source_other as string} />
+                <Field label="Marital status (other)" value={profile.marital_status_other as string} />
                 <Field label="Referral code" value={profile.referral_code as string} />
                 <Field label="Referred by" value={profile.referred_by as string} />
                 <Field label="Marketing consent" value={fmtBool(profile.marketing_consent)} />
-                <Field label="Preferred contact" value={profile.preferred_contact_method as string} />
+                <Field label="Preferred contact method" value={profile.preferred_contact_method as string} />
+                <div className="py-2 border-b">
+                  <div className="text-xs text-muted-foreground mb-1">Preferred contact windows (for calls)</div>
+                  {profile.preferred_contact_windows ? (
+                    <div className="text-sm space-y-1">
+                      {(Array.isArray(profile.preferred_contact_windows) 
+                        ? profile.preferred_contact_windows 
+                        : JSON.parse(String(profile.preferred_contact_windows))
+                      ).map((w: any, i: number) => (
+                        <div key={i} className="text-muted-foreground">
+                          {w.day} — {w.time_of_day}
+                        </div>
+                      ))}
+                    </div>
+                  ) : <span className="text-sm text-muted-foreground">—</span>}
+                </div>
                 <div className="py-2 border-b">
                   <div className="text-xs text-muted-foreground mb-1">CRM tags</div>
                   <div className="flex flex-wrap gap-1">
